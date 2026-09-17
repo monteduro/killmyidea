@@ -6,3 +6,4 @@ dist
 .vercel
 *.tsbuildinfo
 .DS_Store
+dist-server

@@ -1,3 +1,5 @@
+import { REPO_URL } from '../lib/features'
+
 export function Footer() {
   return (
     <footer className="mt-auto flex flex-wrap justify-between gap-x-6 gap-y-1 px-5 pb-6 pt-10 font-mono text-[10px] uppercase tracking-widest opacity-50 sm:px-8">
@@ -8,7 +10,10 @@ export function Footer() {
         </a>
       </span>
       <span>
-        Built by{' '}
+        <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="underline">
+          Source on GitHub
+        </a>
+        {' · '}Built by{' '}
         <a href="https://x.com/stemonteduro" target="_blank" rel="noopener noreferrer" className="underline">
           stemonte
         </a>
