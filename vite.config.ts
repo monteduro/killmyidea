@@ -42,6 +42,27 @@ function siteUrl(): Plugin {
   }
 }
 
+// DataFast cookieless analytics. The website id is public (it ships in the HTML).
+// Production builds use it by default; dev only tracks if DATAFAST_WEBSITE_ID is set.
+// Set DATAFAST_WEBSITE_ID=off to disable.
+const DATAFAST_DEFAULT_ID = 'dfid_UvVlC3fid8kOr95YTMIho'
+
+function datafast(mode: string): Plugin {
+  return {
+    name: 'datafast',
+    transformIndexHtml(html) {
+      const env = process.env.DATAFAST_WEBSITE_ID
+      const id = env === 'off' ? '' : env || (mode === 'production' ? DATAFAST_DEFAULT_ID : '')
+      const domain = process.env.DATAFAST_DOMAIN || 'killmyidea.stemonte.io'
+      const snippet = id
+        ? `<script>window.datafast=window.datafast||function(){(window.datafast.q=window.datafast.q||[]).push(arguments)};</script>
+    <script defer data-website-id="${id}" data-domain="${domain}" src="https://datafa.st/js/script.cookieless.js"></script>`
+        : ''
+      return html.replace('<!--DATAFAST-->', snippet)
+    },
+  }
+}
+
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     let data = ''
@@ -54,7 +75,7 @@ function readBody(req: IncomingMessage): Promise<string> {
 export default defineConfig(({ mode }) => {
   Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
   return {
-    plugins: [react(), tailwindcss(), localApi(), siteUrl()],
+    plugins: [react(), tailwindcss(), localApi(), siteUrl(), datafast(mode)],
     server: { host: '127.0.0.1', port: 5317, strictPort: true },
     test: { environment: 'node' },
   }

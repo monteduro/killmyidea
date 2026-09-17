@@ -5,6 +5,7 @@ import { HistoryDrawer } from './components/HistoryDrawer'
 import { IdeaForm } from './components/IdeaForm'
 import { Judging } from './components/Judging'
 import { Result } from './components/Result'
+import { resultParams, track } from './lib/analytics'
 import { ideaStore, toSavedIdea, type SavedIdea } from './lib/storage'
 import type { EvaluateRequest, Evaluation, ResultModel } from './lib/types'
 
@@ -49,6 +50,7 @@ export default function App() {
   async function submit() {
     setError(null)
     setView('judging')
+    track('idea_submitted', { length: idea.trim().length, saved: save })
     try {
       const [evaluation] = await Promise.all([
         evaluate({ idea, datasetOptIn: datasetOptIn || undefined }),
@@ -58,10 +60,12 @@ export default function App() {
         await ideaStore.save(toSavedIdea(idea.trim(), evaluation))
         void refreshHistory()
       }
+      track('idea_judged', { ...resultParams(evaluation), latency_ms: evaluation.latencyMs, saved: save })
       setResult(evaluation)
       setSaved(save)
       setView('result')
     } catch (e) {
+      track('idea_failed')
       setError(e instanceof Error ? e.message : 'Something went wrong.')
       setView('form')
     }
@@ -74,6 +78,7 @@ export default function App() {
   }
 
   function openSaved(item: SavedIdea) {
+    track('history_opened', resultParams(item))
     setIdea(item.idea)
     setResult(item)
     setSaved(true)

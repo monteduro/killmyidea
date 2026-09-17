@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "datafast": {
+      "type": "http",
+      "url": "https://datafa.st/api/mcp"
+    }
+  }
+}

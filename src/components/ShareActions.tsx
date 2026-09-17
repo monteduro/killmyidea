@@ -1,4 +1,5 @@
 import { useState, type RefObject } from 'react'
+import { resultParams, track } from '../lib/analytics'
 import { clipboardText, xIntentUrl } from '../lib/share'
 import type { ResultModel } from '../lib/types'
 
@@ -10,6 +11,7 @@ export function ShareActions({ result, cardRef }: { result: ResultModel; cardRef
   const [downloading, setDownloading] = useState(false)
 
   async function copy() {
+    track('result_copied', resultParams(result))
     try {
       await navigator.clipboard.writeText(clipboardText(result))
       setCopied(true)
@@ -22,6 +24,7 @@ export function ShareActions({ result, cardRef }: { result: ResultModel; cardRef
   async function download() {
     const node = cardRef.current
     if (!node) return
+    track('card_downloaded', resultParams(result))
     setDownloading(true)
     try {
       const { toPng } = await import('html-to-image')
@@ -40,7 +43,13 @@ export function ShareActions({ result, cardRef }: { result: ResultModel; cardRef
       <button onClick={copy} className={btn}>
         {copied ? 'Copied ✓' : 'Copy result'}
       </button>
-      <a href={xIntentUrl(result)} target="_blank" rel="noopener noreferrer" className={`${btn} bg-paper text-ink hover:bg-kill`}>
+      <a
+        href={xIntentUrl(result)}
+        onClick={() => track('shared_on_x', resultParams(result))}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${btn} bg-paper text-ink hover:bg-kill`}
+      >
         Share on X
       </a>
       <button onClick={download} disabled={downloading} className={btn}>

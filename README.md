@@ -93,11 +93,34 @@ src/lib/features.ts       DATASET_ENABLED flag, site URL
 src/components/           UI
 ```
 
+## Analytics (DataFast, cookieless)
+
+Production builds load DataFast's cookieless script (`script.cookieless.js`) with
+the site id `dfid_UvVlC3fid8kOr95YTMIho` (`vite.config.ts`). Dev builds only track
+when `DATAFAST_WEBSITE_ID` is set; `DATAFAST_WEBSITE_ID=off` disables tracking.
+`DATAFAST_DOMAIN` defaults to `killmyidea.stemonte.io`. In DataFast, enable **Settings → General → Cookieless / privacy mode**
+so the dashboard matches the script.
+
+Custom goals (`src/lib/analytics.ts`):
+
+| Goal | When | Params |
+|---|---|---|
+| `idea_submitted` | idea sent to Jev | `length`, `saved` |
+| `idea_judged` | result shown | `verdict`, `score`, `category`, `best`, `worst`, `latency_ms`, `saved` |
+| `idea_failed` | evaluation error | – |
+| `result_copied` / `shared_on_x` / `card_downloaded` | share actions | result params |
+| `history_opened` | saved idea reopened | result params |
+
+The idea text is never sent to DataFast.
+
+`.mcp.json` registers the official DataFast MCP server (`https://datafa.st/api/mcp`).
+In Claude Code, run `/mcp` and sign in with OAuth to query these analytics.
+
 ## Privacy
 
 - Saving is off by default. Unsaved ideas are evaluated and then discarded.
 - Saved ideas stay in the browser's `localStorage`. There are no accounts.
-- The API never logs idea text. To move history to Supabase, implement
+- The API never logs idea text, and analytics never receive it. To move history to Supabase, implement
   `IdeaStore` in `src/lib/storage.ts`.
 - The public dataset checkbox is hidden (`DATASET_ENABLED = false`) until
   `api/_dataset.ts` has a real backend.
