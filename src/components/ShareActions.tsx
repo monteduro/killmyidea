@@ -1,5 +1,4 @@
 import { useState, type RefObject } from 'react'
-import { resultParams, track } from '../lib/analytics'
 import { clipboardText, xIntentUrl } from '../lib/share'
 import type { ResultModel } from '../lib/types'
 
@@ -11,7 +10,6 @@ export function ShareActions({ result, idea, cardRef }: { result: ResultModel; i
   const [downloading, setDownloading] = useState(false)
 
   async function copy() {
-    track('result_copied', resultParams(result))
     try {
       await navigator.clipboard.writeText(clipboardText(result))
       setCopied(true)
@@ -24,7 +22,6 @@ export function ShareActions({ result, idea, cardRef }: { result: ResultModel; i
   async function download() {
     const node = cardRef.current
     if (!node) return
-    track('card_downloaded', resultParams(result))
     setDownloading(true)
     try {
       const { toPng } = await import('html-to-image')
@@ -45,7 +42,6 @@ export function ShareActions({ result, idea, cardRef }: { result: ResultModel; i
       </button>
       <a
         href={xIntentUrl(result, idea)}
-        onClick={() => track('shared_on_x', resultParams(result))}
         target="_blank"
         rel="noopener noreferrer"
         className={`${btn} bg-paper text-ink hover:bg-kill`}

@@ -1,9 +1,9 @@
 // POST /api/evaluate — the only server code. Holds TYPESAFE_API_KEY.
-// The idea text is never logged or stored here.
+import { randomUUID } from 'node:crypto'
 import { buildState, composeEvaluation, validateIdea } from '../src/lib/evaluate.js'
 import { QUESTIONS } from '../src/lib/questions.js'
 import { TypeSafeError, askJev } from '../src/lib/typesafe.js'
-import { saveToDataset } from './_dataset.js'
+import { saveEvaluation } from './_analytics-db.js'
 import { mockJev } from './_mock.js'
 
 const json = (body: unknown, status = 200) =>
@@ -13,7 +13,7 @@ const json = (body: unknown, status = 200) =>
   })
 
 export async function POST(request: Request): Promise<Response> {
-  let payload: { idea?: unknown; datasetOptIn?: unknown }
+  let payload: { idea?: unknown; doNotArchive?: unknown }
   try {
     payload = await request.json()
   } catch {
@@ -34,7 +34,19 @@ export async function POST(request: Request): Promise<Response> {
 
     const evaluation = composeEvaluation(response, latencyMs, useMock)
 
-    if (payload.datasetOptIn === true) await saveToDataset(valid.idea, evaluation)
+    if (payload.doNotArchive !== true) {
+      try {
+        saveEvaluation({
+          requestId: randomUUID(),
+          createdAt: new Date().toISOString(),
+          idea: valid.idea,
+          evaluation,
+        })
+      } catch (err) {
+        // Archiving must not make a successful evaluation fail.
+        console.error('[evaluate] analytics archive failed:', err instanceof Error ? err.message : 'unknown')
+      }
+    }
 
     return json(evaluation)
   } catch (err) {

@@ -5,7 +5,7 @@ import { HistoryDrawer } from './components/HistoryDrawer'
 import { IdeaForm } from './components/IdeaForm'
 import { Judging } from './components/Judging'
 import { Result } from './components/Result'
-import { resultParams, track } from './lib/analytics'
+import { trackIdeaSubmitted } from './lib/analytics'
 import { ideaStore, toSavedIdea, type SavedIdea } from './lib/storage'
 import type { EvaluateRequest, Evaluation, ResultModel } from './lib/types'
 
@@ -32,7 +32,7 @@ export default function App() {
   const [view, setView] = useState<View>('form')
   const [idea, setIdea] = useState('')
   const [save, setSave] = useState(false)
-  const [datasetOptIn, setDatasetOptIn] = useState(false)
+  const [doNotArchive, setDoNotArchive] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<ResultModel | null>(null)
   const [saved, setSaved] = useState(false)
@@ -50,22 +50,20 @@ export default function App() {
   async function submit() {
     setError(null)
     setView('judging')
-    track('idea_submitted', { length: idea.trim().length, saved: save })
+    trackIdeaSubmitted({ length: idea.trim().length, saved: save, archived: !doNotArchive })
     try {
       const [evaluation] = await Promise.all([
-        evaluate({ idea, datasetOptIn: datasetOptIn || undefined }),
+        evaluate({ idea, doNotArchive: doNotArchive || undefined }),
         new Promise((r) => setTimeout(r, MIN_JUDGING_MS)),
       ])
       if (save) {
         await ideaStore.save(toSavedIdea(idea.trim(), evaluation))
         void refreshHistory()
       }
-      track('idea_judged', { ...resultParams(evaluation), latency_ms: evaluation.latencyMs, saved: save })
       setResult(evaluation)
       setSaved(save)
       setView('result')
     } catch (e) {
-      track('idea_failed')
       setError(e instanceof Error ? e.message : 'Something went wrong.')
       setView('form')
     }
@@ -78,7 +76,6 @@ export default function App() {
   }
 
   function openSaved(item: SavedIdea) {
-    track('history_opened', resultParams(item))
     setIdea(item.idea)
     setResult(item)
     setSaved(true)
@@ -100,11 +97,11 @@ export default function App() {
           <IdeaForm
             idea={idea}
             save={save}
-            datasetOptIn={datasetOptIn}
+            doNotArchive={doNotArchive}
             error={error}
             onIdea={setIdea}
             onSave={setSave}
-            onDatasetOptIn={setDatasetOptIn}
+            onDoNotArchive={setDoNotArchive}
             onSubmit={submit}
           />
         )}

@@ -42,6 +42,6 @@ export type Evaluation = ResultModel & {
 
 export type EvaluateRequest = {
   idea: string
-  /** Future public dataset consent. Ignored until the dataset exists. */
-  datasetOptIn?: boolean
+  /** Explicit privacy opt-out. Successful evaluations are archived by default. */
+  doNotArchive?: boolean
 }

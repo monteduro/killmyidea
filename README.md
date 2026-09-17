@@ -28,6 +28,10 @@ TYPESAFE_API_KEY=your_key
 
 The key is only read by `api/evaluate.ts` and never reaches the browser.
 
+Successful evaluations are archived in SQLite at `data/analytics.sqlite` by
+default. Set `ANALYTICS_DB_PATH` to an absolute path on a persistent disk in
+production. Users can opt out per request with the checkbox below private history.
+
 `SITE_URL` (optional) sets the absolute URL used in the OG/Twitter image tags.
 It defaults to `https://killmyidea.stemonte.io`. The image itself is `public/og.png` (1200×630).
 
@@ -59,6 +63,11 @@ npm run build        # typecheck + static build in dist/
 
 Or use the CLI: `npx vercel --prod`.
 
+SQLite needs a persistent local disk. It works directly with the Node server
+(`npm run build:server && npm start`) and hosts such as Forge. Vercel Functions
+do not provide a durable filesystem, so use a persistent deployment or replace
+the archive adapter before relying on the collected data there.
+
 ## 6. Scoring
 
 `src/lib/scoring.ts` and `src/lib/verdict.ts`. That's all there is:
@@ -81,7 +90,7 @@ Different, Buildable, Shareable. Each has five levels written as concrete situat
 
 ```
 api/evaluate.ts           serverless endpoint (validate → Jev → score → respond)
-api/_dataset.ts           no-op hook for a future public dataset (opt-in only)
+api/_analytics-db.ts      SQLite archive for evaluation requests and scores
 api/_mock.ts              local-only fake answers
 src/lib/questions.ts      Jev questions
 src/lib/scoring.ts        0-4 → 0-100, average
@@ -89,7 +98,7 @@ src/lib/verdict.ts        KILL / FIX / SHIP thresholds
 src/lib/copy.ts           fixed copy per question
 src/lib/storage.ts        history (IdeaStore interface, localStorage implementation)
 src/lib/share.ts          share text and X intent URL
-src/lib/features.ts       DATASET_ENABLED flag, site URL
+src/lib/features.ts       public site and repository URLs
 src/components/           UI
 ```
 
@@ -101,26 +110,30 @@ when `DATAFAST_WEBSITE_ID` is set; `DATAFAST_WEBSITE_ID=off` disables tracking.
 `DATAFAST_DOMAIN` defaults to `killmyidea.stemonte.io`. In DataFast, enable **Settings → General → Cookieless / privacy mode**
 so the dashboard matches the script.
 
-Custom goals (`src/lib/analytics.ts`):
+There is one custom goal (`src/lib/analytics.ts`): `idea_submitted`, with
+`length`, `saved`, and `archived` params. The idea text is never sent to DataFast.
 
-| Goal | When | Params |
-|---|---|---|
-| `idea_submitted` | idea sent to Jev | `length`, `saved` |
-| `idea_judged` | result shown | `verdict`, `score`, `category`, `best`, `worst`, `latency_ms`, `saved` |
-| `idea_failed` | evaluation error | – |
-| `result_copied` / `shared_on_x` / `card_downloaded` | share actions | result params |
-| `history_opened` | saved idea reopened | result params |
+## Evaluation archive (SQLite)
 
-The idea text is never sent to DataFast.
+Unless the user checks the opt-out, each successful evaluation creates one row
+in the `evaluations` table. It includes the idea, total score, verdict, category,
+all eight dimension scores, understandability, latency, model, token usage and
+the complete diagnostic response JSON. It deliberately excludes IP addresses,
+cookies and browser identifiers.
+
+For example:
+
+```bash
+sqlite3 data/analytics.sqlite \
+  'SELECT verdict, COUNT(*), ROUND(AVG(score), 1) FROM evaluations GROUP BY verdict;'
+```
 
 `.mcp.json` registers the official DataFast MCP server (`https://datafa.st/api/mcp`).
 In Claude Code, run `/mcp` and sign in with OAuth to query these analytics.
 
 ## Privacy
 
-- Saving is off by default. Unsaved ideas are evaluated and then discarded.
-- Saved ideas stay in the browser's `localStorage`. There are no accounts.
-- The API never logs idea text, and analytics never receive it. To move history to Supabase, implement
+- Private history is off by default and stays in the browser's `localStorage`. There are no accounts.
+- Successful evaluations are archived server-side for product analysis by default; the form provides an explicit opt-out.
+- DataFast never receives idea text. To move private history to Supabase, implement
   `IdeaStore` in `src/lib/storage.ts`.
-- The public dataset checkbox is hidden (`DATASET_ENABLED = false`) until
-  `api/_dataset.ts` has a real backend.

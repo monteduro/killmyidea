@@ -1,6 +1,5 @@
 import { useId } from 'react'
 import { IDEA_MAX, IDEA_MIN } from '../lib/evaluate'
-import { DATASET_ENABLED } from '../lib/features'
 import { Logo } from './Logo'
 
 const PLACEHOLDER =
@@ -9,11 +8,11 @@ const PLACEHOLDER =
 type Props = {
   idea: string
   save: boolean
-  datasetOptIn: boolean
+  doNotArchive: boolean
   error: string | null
   onIdea: (v: string) => void
   onSave: (v: boolean) => void
-  onDatasetOptIn: (v: boolean) => void
+  onDoNotArchive: (v: boolean) => void
   onSubmit: () => void
 }
 
@@ -60,17 +59,17 @@ export function IdeaForm(p: Props) {
         </div>
       </div>
 
-      <Checkbox checked={p.save} onChange={p.onSave} label="Save my idea to my history">
-        Off by default. Your idea won't be stored unless you choose to save it.
+      <Checkbox checked={p.save} onChange={p.onSave} label="Save my idea to my private history">
+        Off by default. Saved only in this browser.
       </Checkbox>
 
-      {DATASET_ENABLED && (
-        <Checkbox
-          checked={p.datasetOptIn}
-          onChange={p.onDatasetOptIn}
-          label="I anonymously allow this idea and its scores to be used in the public Kill My Idea dataset."
-        />
-      )}
+      <Checkbox
+        checked={p.doNotArchive}
+        onChange={p.onDoNotArchive}
+        label="Don't archive this evaluation for product analysis"
+      >
+        By default, the idea and its scores are stored on the server to help measure and improve the tool.
+      </Checkbox>
 
       {p.error && (
         <p role="alert" className="mt-6 border-2 border-kill px-4 py-3 font-mono text-sm text-kill">
