@@ -74,6 +74,9 @@ the archive adapter before relying on the collected data there.
 
 - each question: Jev score 0–4 × 25 → 0–100
 - **score = average of the 8 questions, with Problem and Money counting double** (`WEIGHTS`)
+- the goal picked in the form swaps Money for another double-weight question:
+  **Make money** → Money · **Open source** → Adoption · **Just for fun** → Fun
+  (`GOAL_DIMENSION`). The API takes `goal` (`money` default, `open_source`, `fun`).
 - **KILL** below 50 · **FIX** 50–64 · **SHIP** 65+ (`VERDICT_THRESHOLDS`)
 
 BEST SIGNAL / BIGGEST RISK are the highest / lowest question, with fixed copy in
@@ -83,7 +86,7 @@ BEST SIGNAL / BIGGEST RISK are the highest / lowest question, with fixed copy in
 ## 7. Jev questions
 
 `src/lib/questions.ts`: Real problem, Clear customer, Demand, Money, Reach,
-Different, Buildable, Shareable. Each has five levels written as concrete situations
+Different, Buildable, Shareable, plus Adoption and Fun for the non-money goals. Each has five levels written as concrete situations
 (Jev judges each level on its own). The HTTP client is `src/lib/typesafe.ts`.
 
 ## Layout

@@ -6,10 +6,11 @@ declare global {
   }
 }
 
-export function trackIdeaSubmitted(params: { length: number; saved: boolean; archived: boolean }) {
+export function trackIdeaSubmitted(params: { length: number; goal: string; saved: boolean; archived: boolean }) {
   try {
     window.datafast?.('idea_submitted', {
       length: String(params.length),
+      goal: params.goal,
       saved: String(params.saved),
       archived: String(params.archived),
     })

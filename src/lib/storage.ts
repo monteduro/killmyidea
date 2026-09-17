@@ -1,5 +1,6 @@
 // Idea history. v1 keeps everything in localStorage; swap `ideaStore` for a
 // Supabase/API implementation of IdeaStore later without touching the UI.
+import type { Goal } from './questions'
 import type { ResultModel } from './types'
 import type { Verdict } from './verdict'
 
@@ -9,6 +10,7 @@ export type SavedIdea = {
   createdAt: string
   score: number
   verdict: Verdict
+  goal?: Goal
   dimensions: Record<string, number>
   category: string
   understandable?: number
@@ -34,6 +36,7 @@ export function toSavedIdea(idea: string, result: ResultModel, now = new Date())
     createdAt: now.toISOString(),
     score: result.score,
     verdict: result.verdict,
+    goal: result.goal,
     dimensions: { ...result.dimensions },
     category: result.category,
     understandable: result.understandable,

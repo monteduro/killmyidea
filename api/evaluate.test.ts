@@ -39,3 +39,26 @@ describe('POST /api/evaluate archive preference', () => {
     expect(saveEvaluation).toHaveBeenCalledOnce()
   })
 })
+
+describe('POST /api/evaluate goal', () => {
+  it('judges with the chosen goal and rejects unknown ones', async () => {
+    vi.stubEnv('TYPESAFE_MOCK', '1')
+    vi.stubEnv('VERCEL', '')
+    const post = (goal: unknown) =>
+      POST(
+        new Request('http://localhost/api/evaluate', {
+          method: 'POST',
+          body: JSON.stringify({ idea: 'An open source idea evaluator for founders.', goal, doNotArchive: true }),
+        }),
+      )
+
+    const res = await post('open_source')
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.goal).toBe('open_source')
+    expect(body.dimensions).toHaveProperty('adoption')
+    expect(body.dimensions).not.toHaveProperty('money')
+
+    expect((await post('crypto')).status).toBe(400)
+  })
+})

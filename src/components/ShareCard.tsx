@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 import { SITE_HOST } from '../lib/features'
 import { DECISION_COUNT } from '../lib/questions'
-import { bestAndWorst, cardIdea } from '../lib/share'
+import { bestAndWorst, goalTag } from '../lib/share'
 import type { ResultModel } from '../lib/types'
 import { verdictBg } from '../lib/ui'
 import { verdictLabel } from '../lib/verdict'
@@ -12,12 +12,13 @@ export const ShareCard = forwardRef<HTMLDivElement, { result: ResultModel; idea?
   ref,
 ) {
   const { best, worst } = bestAndWorst(result)
-  const quote = idea ? cardIdea(idea) : null
+  const quote = idea?.trim() || null
+  const goal = goalTag(result)
   return (
     <div className="@container w-full">
       <div
         ref={ref}
-        className="relative flex aspect-[1200/630] w-full flex-col justify-between overflow-hidden bg-paper p-[4cqw] text-ink"
+        className="relative flex min-h-[52.5cqw] w-full flex-col justify-between bg-paper p-[4cqw] text-ink"
       >
         <div className="flex items-start justify-between">
           <span className="block text-[3.4cqw] font-black uppercase leading-[0.82] tracking-[-0.04em]">
@@ -43,7 +44,7 @@ export const ShareCard = forwardRef<HTMLDivElement, { result: ResultModel; idea?
 
         {quote && (
           <p
-            className={`line-clamp-3 border-l-[0.5cqw] border-ink pl-[1.6cqw] font-semibold leading-[1.12] tracking-tight ${
+            className={`break-words border-l-[0.5cqw] border-ink pl-[1.6cqw] font-semibold leading-[1.12] tracking-tight ${
               quote.length > 90 ? 'text-[2.5cqw]' : 'text-[3.3cqw]'
             }`}
           >
@@ -63,6 +64,11 @@ export const ShareCard = forwardRef<HTMLDivElement, { result: ResultModel; idea?
             >
               {verdictLabel(result.verdict)}
             </div>
+            {goal && (
+              <span className="ml-[1.4cqw] align-bottom font-mono text-[1.6cqw] font-bold uppercase tracking-widest">
+                Goal: {goal}
+              </span>
+            )}
           </div>
 
           <dl className="w-[38%] shrink-0 border-t-[0.3cqw] border-ink pb-[0.5cqw] font-mono uppercase">

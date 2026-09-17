@@ -1,5 +1,6 @@
-import { useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { IDEA_MAX, IDEA_MIN } from '../lib/evaluate'
+import { GOAL_LABELS, GOALS, type Goal } from '../lib/questions'
 import { Logo } from './Logo'
 
 const PLACEHOLDER =
@@ -7,10 +8,12 @@ const PLACEHOLDER =
 
 type Props = {
   idea: string
+  goal: Goal
   save: boolean
   doNotArchive: boolean
   error: string | null
   onIdea: (v: string) => void
+  onGoal: (v: Goal) => void
   onSave: (v: boolean) => void
   onDoNotArchive: (v: boolean) => void
   onSubmit: () => void
@@ -20,6 +23,13 @@ export function IdeaForm(p: Props) {
   const id = useId()
   const length = p.idea.trim().length
   const tooShort = length < IDEA_MIN
+  const textarea = useRef<HTMLTextAreaElement>(null)
+
+  // When refining, the idea is already there: put the caret after it.
+  useEffect(() => {
+    const el = textarea.current
+    el?.setSelectionRange(el.value.length, el.value.length)
+  }, [])
 
   return (
     <form
@@ -40,6 +50,7 @@ export function IdeaForm(p: Props) {
       <div className="mt-4 border-2 border-ink bg-white/40 focus-within:bg-white/80">
         <textarea
           id={id}
+          ref={textarea}
           value={p.idea}
           maxLength={IDEA_MAX}
           onChange={(e) => p.onIdea(e.target.value)}
@@ -58,6 +69,30 @@ export function IdeaForm(p: Props) {
           </span>
         </div>
       </div>
+
+      <fieldset className="mt-6">
+        <legend className="text-sm font-medium">What's the goal?</legend>
+        <div className="mt-2 grid grid-cols-3 border-2 border-ink">
+          {GOALS.map((g) => (
+            <label key={g} className="cursor-pointer border-ink [&+&]:border-l-2">
+              <input
+                type="radio"
+                name={`${id}-goal`}
+                value={g}
+                checked={p.goal === g}
+                onChange={() => p.onGoal(g)}
+                className="peer sr-only"
+              />
+              <span className="block px-2 py-3 text-center text-sm font-bold uppercase tracking-tight transition-colors peer-checked:bg-ink peer-checked:text-paper peer-focus-visible:outline-2 peer-focus-visible:-outline-offset-4 peer-focus-visible:outline-kill hover:bg-ink/10 peer-checked:hover:bg-ink sm:text-base">
+                {GOAL_LABELS[g]}
+              </span>
+            </label>
+          ))}
+        </div>
+        <p className="mt-1 font-mono text-[11px] leading-snug opacity-60">
+          Not about money? Jev swaps the Money question for Adoption or Fun.
+        </p>
+      </fieldset>
 
       <Checkbox checked={p.save} onChange={p.onSave} label="Save my idea to my private history">
         Off by default. Saved only in this browser.

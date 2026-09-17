@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
-import { DIMENSION_LABELS, DIMENSIONS } from '../lib/questions'
+import { DIMENSION_LABELS, dimensionsFor, type Goal } from '../lib/questions'
 
-const STEPS = [...DIMENSIONS.map((k) => DIMENSION_LABELS[k]), 'Category', 'Clarity']
+const stepsFor = (goal: Goal) => [...dimensionsFor(goal).map((k) => DIMENSION_LABELS[k]), 'Category', 'Clarity']
 
 export const STEP_MS = 45
 
-export function Judging() {
+export function Judging({ goal }: { goal: Goal }) {
   const [n, setN] = useState(0)
+  const steps = stepsFor(goal)
   useEffect(() => {
-    const t = setInterval(() => setN((v) => Math.min(v + 1, STEPS.length)), STEP_MS)
+    const t = setInterval(() => setN((v) => Math.min(v + 1, steps.length)), STEP_MS)
     return () => clearInterval(t)
-  }, [])
+  }, [steps.length])
 
   return (
     <section aria-live="polite" className="mx-auto w-full max-w-5xl px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
@@ -18,7 +19,7 @@ export function Judging() {
         Jev is judging you<span className="animate-blink">...</span>
       </p>
       <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-1.5 font-mono text-sm uppercase tracking-wider sm:grid-cols-4">
-        {STEPS.slice(0, n).map((s) => (
+        {steps.slice(0, n).map((s) => (
           <li key={s} className="animate-rise">
             {s} <span className="text-ship">✓</span>
           </li>

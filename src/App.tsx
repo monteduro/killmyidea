@@ -6,6 +6,7 @@ import { IdeaForm } from './components/IdeaForm'
 import { Judging } from './components/Judging'
 import { Result } from './components/Result'
 import { trackIdeaSubmitted } from './lib/analytics'
+import { DEFAULT_GOAL, type Goal } from './lib/questions'
 import { ideaStore, toSavedIdea, type SavedIdea } from './lib/storage'
 import type { EvaluateRequest, Evaluation, ResultModel } from './lib/types'
 
@@ -31,6 +32,7 @@ async function evaluate(body: EvaluateRequest): Promise<Evaluation> {
 export default function App() {
   const [view, setView] = useState<View>('form')
   const [idea, setIdea] = useState('')
+  const [goal, setGoal] = useState<Goal>(DEFAULT_GOAL)
   const [save, setSave] = useState(false)
   const [doNotArchive, setDoNotArchive] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -50,10 +52,10 @@ export default function App() {
   async function submit() {
     setError(null)
     setView('judging')
-    trackIdeaSubmitted({ length: idea.trim().length, saved: save, archived: !doNotArchive })
+    trackIdeaSubmitted({ length: idea.trim().length, goal, saved: save, archived: !doNotArchive })
     try {
       const [evaluation] = await Promise.all([
-        evaluate({ idea, doNotArchive: doNotArchive || undefined }),
+        evaluate({ idea, goal, doNotArchive: doNotArchive || undefined }),
         new Promise((r) => setTimeout(r, MIN_JUDGING_MS)),
       ])
       if (save) {
@@ -75,8 +77,15 @@ export default function App() {
     setView('form')
   }
 
+  /** Back to the form with the idea and goal still filled in. */
+  function refine() {
+    setResult(null)
+    setView('form')
+  }
+
   function openSaved(item: SavedIdea) {
     setIdea(item.idea)
+    setGoal(item.goal ?? DEFAULT_GOAL)
     setResult(item)
     setSaved(true)
     setHistoryOpen(false)
@@ -96,18 +105,20 @@ export default function App() {
         {view === 'form' && (
           <IdeaForm
             idea={idea}
+            goal={goal}
             save={save}
             doNotArchive={doNotArchive}
             error={error}
             onIdea={setIdea}
+            onGoal={setGoal}
             onSave={setSave}
             onDoNotArchive={setDoNotArchive}
             onSubmit={submit}
           />
         )}
-        {view === 'judging' && <Judging />}
+        {view === 'judging' && <Judging goal={goal} />}
         {view === 'result' && result && (
-          <Result key={JSON.stringify(result.dimensions)} result={result} idea={idea} saved={saved} debug={debug} onAgain={reset} />
+          <Result key={JSON.stringify(result.dimensions)} result={result} idea={idea} saved={saved} debug={debug} onAgain={reset} onRefine={refine} />
         )}
       </main>
 

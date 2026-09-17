@@ -1,6 +1,6 @@
 // Local UI development only (TYPESAFE_MOCK=1, never on Vercel).
 // Deterministic fake answers derived from the idea text. Not Jev.
-import { CATEGORIES, DIMENSIONS, QUESTIONS } from '../src/lib/questions.js'
+import { CATEGORIES, DEFAULT_GOAL, dimensionsFor, questionsFor, type Goal } from '../src/lib/questions.js'
 import type { Answer, SystemOneResponse } from '../src/lib/typesafe.js'
 
 function rng(seed: string) {
@@ -21,18 +21,22 @@ function choice(options: readonly string[], rand: () => number): Answer {
   return { type: 'choice', choice: best, probabilities, confidence: Math.max(...weights) / total }
 }
 
-export async function mockJev(idea: string): Promise<{ response: SystemOneResponse; latencyMs: number }> {
+export async function mockJev(
+  idea: string,
+  goal: Goal = DEFAULT_GOAL,
+): Promise<{ response: SystemOneResponse; latencyMs: number }> {
   const started = performance.now()
   const rand = rng(idea)
+  const questions = questionsFor(goal)
   const answers: Record<string, Answer> = {}
-  for (const k of DIMENSIONS) {
+  for (const k of dimensionsFor(goal)) {
     const peak = rand() * 4
     const lo = Math.floor(peak)
     const frac = peak - lo
     const probabilities: Record<string, number> = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0 }
     probabilities[String(lo)] = 1 - frac
     if (lo < 4) probabilities[String(lo + 1)] = frac
-    const q = QUESTIONS[k]
+    const q = questions[k]
     answers[k] = {
       type: 'score',
       score: peak,

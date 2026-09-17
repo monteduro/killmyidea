@@ -1,5 +1,5 @@
-import { DIMENSION_LABELS, type DimensionKey } from '../lib/questions'
-import { WEIGHTS } from '../lib/scoring'
+import { DIMENSION_LABELS, dimensionsFor, GOAL_LABELS, type DimensionKey } from '../lib/questions'
+import { totalWeight, WEIGHTS } from '../lib/scoring'
 import type { Evaluation } from '../lib/types'
 import { VERDICT_THRESHOLDS } from '../lib/verdict'
 
@@ -19,7 +19,7 @@ export function DebugPanel({ evaluation, defaultOpen = false }: { evaluation: Ev
       </summary>
       <div className="space-y-6 overflow-x-auto p-4">
         <p>
-          model={d.model} latency={d.latencyMs}ms usage=
+          model={d.model} goal={GOAL_LABELS[evaluation.goal]} latency={d.latencyMs}ms usage=
           {d.usage ? `in:${d.usage.input_tokens} out:${d.usage.output_tokens}` : 'n/a'}
         </p>
 
@@ -50,7 +50,7 @@ export function DebugPanel({ evaluation, defaultOpen = false }: { evaluation: Ev
 
         <p className="leading-relaxed">
           score = ({d.dimensions.map((r) => `${r.normalized}×${WEIGHTS[r.key as DimensionKey] ?? 1}`).join(' + ')}) /{' '}
-          {Object.values(WEIGHTS).reduce((a, b) => a + b, 0)} = <b>{evaluation.score}</b>
+          {totalWeight(dimensionsFor(evaluation.goal))} = <b>{evaluation.score}</b>
           <br />
           verdict: KILL &lt;{VERDICT_THRESHOLDS.fix} · FIX {VERDICT_THRESHOLDS.fix}–{VERDICT_THRESHOLDS.ship - 1} · SHIP{' '}
           {VERDICT_THRESHOLDS.ship}+ → <b>{evaluation.verdict}</b>

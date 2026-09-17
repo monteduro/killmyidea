@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import { LOW_CLARITY_COPY, dimensionCopy } from '../lib/copy'
-import { DECISION_COUNT, DIMENSION_HINTS, DIMENSION_LABELS, DIMENSIONS } from '../lib/questions'
-import { LOW_CLARITY_WARNING, WEIGHTS } from '../lib/scoring'
-import { bestAndWorst } from '../lib/share'
+import { DECISION_COUNT, DIMENSION_HINTS, DIMENSION_LABELS, dimensionsFor, type Goal } from '../lib/questions'
+import { LOW_CLARITY_WARNING, totalWeight, WEIGHTS } from '../lib/scoring'
+import { bestAndWorst, goalTag } from '../lib/share'
 import type { Evaluation, ResultModel } from '../lib/types'
 import { verdictText } from '../lib/ui'
 import { VERDICT_THRESHOLDS, verdictLabel } from '../lib/verdict'
@@ -17,38 +17,28 @@ type Props = {
   saved: boolean
   debug: boolean
   onAgain: () => void
+  onRefine: () => void
 }
 
-export function Result({ result, idea, saved, debug, onAgain }: Props) {
+export function Result({ result, idea, saved, debug, onAgain, onRefine }: Props) {
   const cardRef = useRef<HTMLDivElement>(null)
   const unclear = result.understandable != null && result.understandable < LOW_CLARITY_WARNING
   const evaluation = 'debug' in result ? (result as Evaluation) : null
   const { best, worst } = bestAndWorst(result)
+  const goal = goalTag(result)
   const [ideaOnCard, setIdeaOnCard] = useState(true)
-  const [expanded, setExpanded] = useState(false)
-  const long = idea.length > 220
 
   return (
     <article className="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8 sm:pt-12">
       <section className="animate-rise border-l-4 border-paper pl-4 sm:pl-6">
         <p className="font-mono text-[11px] uppercase tracking-widest opacity-60">
-          The idea · {result.category} {saved && <span>· saved to history</span>}
+          The idea · {result.category} {goal && <span>· {goal}</span>} {saved && <span>· saved to history</span>}
         </p>
         <p
-          className={`mt-2 max-w-4xl whitespace-pre-line text-2xl font-semibold leading-tight tracking-tight sm:text-3xl ${
-            long && !expanded ? 'line-clamp-4' : ''
-          }`}
+          className="mt-2 max-w-4xl whitespace-pre-line text-2xl font-semibold leading-tight tracking-tight sm:text-3xl"
         >
           “{idea}”
         </p>
-        {long && (
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className="mt-2 cursor-pointer font-mono text-[11px] uppercase tracking-widest opacity-60 hover:opacity-100"
-          >
-            {expanded ? 'Show less' : 'Show all'}
-          </button>
-        )}
       </section>
 
       <h1 className="animate-rise mt-10 sm:mt-12">
@@ -79,8 +69,8 @@ export function Result({ result, idea, saved, debug, onAgain }: Props) {
       <div className="mt-12 grid gap-12 border-t-2 border-paper pt-8 md:grid-cols-[1.35fr_1fr]">
         <section>
           <h2 className="mb-5 font-mono text-[11px] uppercase tracking-widest opacity-60">Breakdown / 100</h2>
-          <Breakdown dimensions={result.dimensions} />
-          <Legend />
+          <Breakdown dimensions={result.dimensions} goal={result.goal} />
+          <Legend goal={result.goal} />
         </section>
 
         <section className="space-y-8">
@@ -107,7 +97,13 @@ export function Result({ result, idea, saved, debug, onAgain }: Props) {
         </div>
       </section>
 
-      <section className="mt-14 border-t-2 border-paper pt-8">
+      <section className="mt-14 flex flex-col gap-3 border-t-2 border-paper pt-8 sm:flex-row">
+        <button
+          onClick={onRefine}
+          className="w-full cursor-pointer border-2 border-paper px-6 py-5 text-2xl font-black uppercase tracking-tight transition-colors hover:bg-paper hover:text-ink sm:w-auto"
+        >
+          Refine idea
+        </button>
         <button
           onClick={onAgain}
           className="w-full cursor-pointer bg-paper px-6 py-5 text-2xl font-black uppercase tracking-tight text-ink transition-colors hover:bg-kill sm:w-auto"
@@ -127,13 +123,14 @@ export function Result({ result, idea, saved, debug, onAgain }: Props) {
   )
 }
 
-function Legend() {
-  const weight = Object.values(WEIGHTS).reduce((a, b) => a + b, 0)
+function Legend({ goal }: { goal?: Goal }) {
+  const keys = dimensionsFor(goal)
+  const doubled = keys.filter((k) => k !== 'problem' && WEIGHTS[k] > 1).map((k) => DIMENSION_LABELS[k])
   return (
     <div className="mt-8 border-t border-paper/20 pt-5">
       <h3 className="font-mono text-[11px] uppercase tracking-widest opacity-60">What these mean</h3>
       <dl className="mt-4 space-y-2.5">
-        {DIMENSIONS.map((k) => (
+        {keys.map((k) => (
           <div key={k} className="grid grid-cols-[8.75rem_1fr] gap-2.5 sm:grid-cols-[10rem_1fr] sm:gap-3">
             <dt className="font-mono text-[11px] uppercase tracking-wider opacity-60 sm:text-xs">
               {DIMENSION_LABELS[k]}
@@ -144,8 +141,8 @@ function Legend() {
         ))}
       </dl>
       <p className="mt-4 font-mono text-[11px] leading-relaxed opacity-60">
-        Jev rates each question 0–4, shown as 0–100. The score is their average ({weight} parts: Problem and Money count
-        double).
+        Jev rates each question 0–4, shown as 0–100. The score is their average ({totalWeight(keys)} parts: Problem and{' '}
+        {doubled.join(', ')} count double).
         <br />
         Under {VERDICT_THRESHOLDS.fix} KILL · {VERDICT_THRESHOLDS.fix}–{VERDICT_THRESHOLDS.ship - 1} FIX ·{' '}
         {VERDICT_THRESHOLDS.ship}+ SHIP.

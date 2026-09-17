@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { dimensionCopy, riskCopy, strengthCopy } from './copy'
 import { composeEvaluation } from './evaluate'
-import { DIMENSIONS, type DimensionKey } from './questions'
-import { bestAndWorst, cardIdea, xIntentUrl, xShareText } from './share'
+import { DIMENSIONS, GOAL_DIMENSIONS } from './questions'
+import { bestAndWorst, cardIdea, shareText, xIntentUrl, xShareText } from './share'
 import type { Answer } from './typesafe'
 
+type MoneyScores = Record<(typeof DIMENSIONS)[number], number>
+
 // Raw Jev 0-4 answers → composeEvaluation → score + verdict.
-function jev(raw: Record<DimensionKey, number>) {
+function jev(raw: MoneyScores) {
   const answers: Record<string, Answer> = {}
   for (const k of DIMENSIONS) answers[k] = { type: 'score', score: raw[k], confidence: 0.7, legend: {}, probabilities: {} }
   answers.category = { type: 'choice', choice: 'Other', confidence: 0.5, probabilities: {} }
@@ -39,7 +41,7 @@ describe('idea profiles', () => {
   })
 
   it('keeps every Jev value, only scaled to 0-100', () => {
-    const e = jev(Object.fromEntries(DIMENSIONS.map((k) => [k, 2.2])) as Record<DimensionKey, number>)
+    const e = jev(Object.fromEntries(DIMENSIONS.map((k) => [k, 2.2])) as MoneyScores)
     for (const k of DIMENSIONS) expect(e.dimensions[k]).toBe(55)
     expect(e.score).toBe(55)
   })
@@ -56,7 +58,7 @@ describe('best signal / biggest risk', () => {
   })
 
   it('has copy for every question', () => {
-    for (const k of DIMENSIONS) {
+    for (const k of [...DIMENSIONS, ...GOAL_DIMENSIONS]) {
       expect(strengthCopy[k]).toBeTruthy()
       expect(riskCopy[k]).toBeTruthy()
     }
@@ -88,7 +90,17 @@ describe('X sharing', () => {
     expect(url.searchParams.get('text')).toContain('“An app for dogs”')
   })
 
-  it('shortens a long idea for X', () => {
-    expect(xShareText(result, 'word '.repeat(60))).toContain('word…')
+  it('keeps a long idea intact for X', () => {
+    const idea = 'word '.repeat(60)
+    expect(xShareText(result, idea)).toContain(idea.trim())
+  })
+})
+
+describe('goal in shared copy', () => {
+  it('mentions non-default goals and stays quiet for Make money', () => {
+    const result = { score: 64, verdict: 'FIX' as const, dimensions: { problem: 60, adoption: 70 }, category: 'AI' }
+    expect(shareText({ ...result, goal: 'open_source' })).toContain('64/100 · Open source')
+    expect(shareText({ ...result, goal: 'money' })).not.toContain('·')
+    expect(shareText(result)).toContain('\n64/100\n')
   })
 })

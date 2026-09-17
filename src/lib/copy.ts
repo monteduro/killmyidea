@@ -11,6 +11,8 @@ export const strengthCopy: Record<DimensionKey, string> = {
   different: "It doesn't look like everything else.",
   buildable: 'You could ship a first version this week.',
   shareable: 'Using it is a reason to talk about it.',
+  adoption: 'Developers would actually pick this up.',
+  fun: 'People would play with this just because.',
 }
 
 export const riskCopy: Record<DimensionKey, string> = {
@@ -22,6 +24,8 @@ export const riskCopy: Record<DimensionKey, string> = {
   different: 'Makes sense, but so do several alternatives.',
   buildable: 'The MVP may cost too much before you learn anything.',
   shareable: 'Nobody has a reason to tell a friend.',
+  adoption: 'Useful to you. Not obviously to other developers.',
+  fun: 'Clever on paper, not much fun to use.',
 }
 
 export const LOW_CLARITY_COPY = [

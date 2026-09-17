@@ -1,3 +1,4 @@
+import type { Goal } from './questions.js'
 import type { SystemOneResponse } from './typesafe.js'
 import type { Verdict } from './verdict.js'
 
@@ -5,6 +6,8 @@ import type { Verdict } from './verdict.js'
 export type ResultModel = {
   score: number
   verdict: Verdict
+  /** Missing on ideas saved before goals existed, which were all judged as "money". */
+  goal?: Goal
   /** Dimension key → 0-100 */
   dimensions: Record<string, number>
   category: string
@@ -34,6 +37,7 @@ export type EvaluationDebug = {
 }
 
 export type Evaluation = ResultModel & {
+  goal: Goal
   understandable: number
   decisions: number
   latencyMs: number
@@ -42,6 +46,7 @@ export type Evaluation = ResultModel & {
 
 export type EvaluateRequest = {
   idea: string
+  goal?: Goal
   /** Explicit privacy opt-out. Successful evaluations are archived by default. */
   doNotArchive?: boolean
 }

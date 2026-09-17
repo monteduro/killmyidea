@@ -7,9 +7,10 @@ describe('trackIdeaSubmitted', () => {
   it('only sends the idea_submitted goal with non-sensitive params', () => {
     const datafast = vi.fn()
     vi.stubGlobal('window', { datafast })
-    trackIdeaSubmitted({ length: 42, saved: false, archived: true })
+    trackIdeaSubmitted({ length: 42, goal: 'open_source', saved: false, archived: true })
     expect(datafast).toHaveBeenCalledWith('idea_submitted', {
       length: '42',
+      goal: 'open_source',
       saved: 'false',
       archived: 'true',
     })
@@ -17,8 +18,8 @@ describe('trackIdeaSubmitted', () => {
 
   it('does nothing when DataFast is not loaded and never throws', () => {
     vi.stubGlobal('window', {})
-    expect(() => trackIdeaSubmitted({ length: 42, saved: false, archived: true })).not.toThrow()
+    expect(() => trackIdeaSubmitted({ length: 42, goal: 'open_source', saved: false, archived: true })).not.toThrow()
     vi.stubGlobal('window', { datafast: () => { throw new Error('boom') } })
-    expect(() => trackIdeaSubmitted({ length: 42, saved: false, archived: true })).not.toThrow()
+    expect(() => trackIdeaSubmitted({ length: 42, goal: 'open_source', saved: false, archived: true })).not.toThrow()
   })
 })

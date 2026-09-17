@@ -3,7 +3,10 @@
 // Eight plain questions an indie hacker would ask. Each one returns a Score
 // from 0 to 4. Jev judges each level on its own, so every level is a complete
 // situation. The idea is sent as `state.startup_idea`.
+//
+// The goal picked in the form only swaps the Money question for one that fits.
 
+/** Questions for the default "Make money" goal, in display order. */
 export const DIMENSIONS = [
   'problem',
   'customer',
@@ -15,7 +18,33 @@ export const DIMENSIONS = [
   'shareable',
 ] as const
 
-export type DimensionKey = (typeof DIMENSIONS)[number]
+/** Replacements for Money when the idea isn't meant to make money. */
+export const GOAL_DIMENSIONS = ['adoption', 'fun'] as const
+
+export type DimensionKey = (typeof DIMENSIONS)[number] | (typeof GOAL_DIMENSIONS)[number]
+
+export const GOALS = ['money', 'open_source', 'fun'] as const
+export type Goal = (typeof GOALS)[number]
+export const DEFAULT_GOAL: Goal = 'money'
+
+export const GOAL_LABELS: Record<Goal, string> = {
+  money: 'Make money',
+  open_source: 'Open source',
+  fun: 'Just for fun',
+}
+
+/** The question that takes Money's slot for each goal. */
+export const GOAL_DIMENSION: Record<Goal, DimensionKey> = {
+  money: 'money',
+  open_source: 'adoption',
+  fun: 'fun',
+}
+
+export const isGoal = (v: unknown): v is Goal => (GOALS as readonly unknown[]).includes(v)
+
+/** The eight scored questions for a goal, in display order. */
+export const dimensionsFor = (goal: Goal = DEFAULT_GOAL): DimensionKey[] =>
+  DIMENSIONS.map((k) => (k === 'money' ? GOAL_DIMENSION[goal] : k))
 
 export const DIMENSION_LABELS: Record<DimensionKey, string> = {
   problem: 'Real problem',
@@ -26,6 +55,8 @@ export const DIMENSION_LABELS: Record<DimensionKey, string> = {
   different: 'Different',
   buildable: 'Buildable',
   shareable: 'Shareable',
+  adoption: 'Adoption',
+  fun: 'Fun',
 }
 
 /** One-line explanation shown in the breakdown legend. */
@@ -38,6 +69,8 @@ export const DIMENSION_HINTS: Record<DimensionKey, string> = {
   different: 'Does it stand out from what already exists?',
   buildable: 'Can 1–2 devs ship a first version fast?',
   shareable: 'Would users tell or show other people?',
+  adoption: 'Would developers use, star and contribute to it?',
+  fun: 'Would people enjoy playing with it?',
 }
 
 export const CATEGORIES = [
@@ -146,10 +179,32 @@ const scoreQuestions: Record<DimensionKey, ScoreQuestion> = {
       'Using it naturally makes people share or show it off.',
     ],
   },
+  adoption: {
+    type: 'score',
+    instructions:
+      'As an open source project, would developers actually use `startup_idea`, star it and contribute to it?',
+    criteria: [
+      'Nobody would install or use it.',
+      'A handful of people might try it once.',
+      'A small group would use it and occasionally star it.',
+      'Developers would use it regularly and some would contribute.',
+      'It fills a gap so clearly that people would adopt, star and help maintain it.',
+    ],
+  },
+  fun: {
+    type: 'score',
+    instructions: 'As a just-for-fun project, would people enjoy playing with `startup_idea`?',
+    criteria: [
+      'Nobody would find it enjoyable.',
+      'Mildly amusing for a few seconds.',
+      'Fun to try once, then forgotten.',
+      'People would come back to play with it.',
+      'So fun people would lose time on it and show it to friends.',
+    ],
+  },
 }
 
-export const QUESTIONS: Record<string, JevQuestion> = {
-  ...scoreQuestions,
+const sharedQuestions: Record<string, JevQuestion> = {
   category: {
     type: 'choice',
     instructions: 'Which category best describes the product in `startup_idea`?',
@@ -172,4 +227,15 @@ export const QUESTIONS: Record<string, JevQuestion> = {
   },
 }
 
+/** Everything sent to Jev for one goal: its eight scored questions plus category and clarity. */
+export function questionsFor(goal: Goal = DEFAULT_GOAL): Record<string, JevQuestion> {
+  return {
+    ...Object.fromEntries(dimensionsFor(goal).map((k) => [k, scoreQuestions[k]])),
+    ...sharedQuestions,
+  }
+}
+
+export const QUESTIONS = questionsFor(DEFAULT_GOAL)
+
+/** Same for every goal: the goal swaps a question, it never adds one. */
 export const DECISION_COUNT = Object.keys(QUESTIONS).length

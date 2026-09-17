@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { DIMENSIONS } from '../lib/questions'
+import { dimensionsFor, type Goal } from '../lib/questions'
 import { rankDimensions } from '../lib/scoring'
 import { dimensionLabel } from '../lib/share'
 
-export function Breakdown({ dimensions }: { dimensions: Record<string, number> }) {
+export function Breakdown({ dimensions, goal }: { dimensions: Record<string, number>; goal?: Goal }) {
   const [grown, setGrown] = useState(false)
   useEffect(() => {
     const r = requestAnimationFrame(() => setGrown(true))
@@ -13,7 +13,8 @@ export function Breakdown({ dimensions }: { dimensions: Record<string, number> }
   const ranked = rankDimensions(dimensions)
   const top = new Set(ranked.slice(0, 3))
   const bottom = new Set(ranked.slice(-3))
-  const keys = [...DIMENSIONS.filter((k) => k in dimensions), ...Object.keys(dimensions).filter((k) => !DIMENSIONS.includes(k as never))]
+  const order: string[] = dimensionsFor(goal)
+  const keys = [...order.filter((k) => k in dimensions), ...Object.keys(dimensions).filter((k) => !order.includes(k))]
 
   return (
     <ul className="space-y-2.5">

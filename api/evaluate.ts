@@ -1,7 +1,7 @@
 // POST /api/evaluate — the only server code. Holds TYPESAFE_API_KEY.
 import { randomUUID } from 'node:crypto'
-import { buildState, composeEvaluation, validateIdea } from '../src/lib/evaluate.js'
-import { QUESTIONS } from '../src/lib/questions.js'
+import { buildState, composeEvaluation, validateGoal, validateIdea } from '../src/lib/evaluate.js'
+import { questionsFor } from '../src/lib/questions.js'
 import { TypeSafeError, askJev } from '../src/lib/typesafe.js'
 import { saveEvaluation } from './_analytics-db.js'
 import { mockJev } from './_mock.js'
@@ -13,7 +13,7 @@ const json = (body: unknown, status = 200) =>
   })
 
 export async function POST(request: Request): Promise<Response> {
-  let payload: { idea?: unknown; doNotArchive?: unknown }
+  let payload: { idea?: unknown; goal?: unknown; doNotArchive?: unknown }
   try {
     payload = await request.json()
   } catch {
@@ -22,6 +22,8 @@ export async function POST(request: Request): Promise<Response> {
 
   const valid = validateIdea(payload?.idea)
   if (!valid.ok) return json({ error: valid.error }, 400)
+  const goal = validateGoal(payload.goal)
+  if (!goal.ok) return json({ error: goal.error }, 400)
 
   const useMock = process.env.TYPESAFE_MOCK === '1' && !process.env.VERCEL
   const apiKey = process.env.TYPESAFE_API_KEY
@@ -29,10 +31,10 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const { response, latencyMs } = useMock
-      ? await mockJev(valid.idea)
-      : await askJev({ apiKey: apiKey!, state: buildState(valid.idea), questions: QUESTIONS })
+      ? await mockJev(valid.idea, goal.goal)
+      : await askJev({ apiKey: apiKey!, state: buildState(valid.idea), questions: questionsFor(goal.goal) })
 
-    const evaluation = composeEvaluation(response, latencyMs, useMock)
+    const evaluation = composeEvaluation(response, latencyMs, useMock, goal.goal)
 
     if (payload.doNotArchive !== true) {
       try {
