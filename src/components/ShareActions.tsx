@@ -6,7 +6,7 @@ import type { ResultModel } from '../lib/types'
 const btn =
   'cursor-pointer border-2 border-paper px-4 py-3 text-center font-mono text-xs font-bold uppercase tracking-widest transition-colors hover:bg-paper hover:text-ink disabled:opacity-40'
 
-export function ShareActions({ result, cardRef }: { result: ResultModel; cardRef: RefObject<HTMLDivElement | null> }) {
+export function ShareActions({ result, idea, cardRef }: { result: ResultModel; idea: string; cardRef: RefObject<HTMLDivElement | null> }) {
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
@@ -44,7 +44,7 @@ export function ShareActions({ result, cardRef }: { result: ResultModel; cardRef
         {copied ? 'Copied ✓' : 'Copy result'}
       </button>
       <a
-        href={xIntentUrl(result)}
+        href={xIntentUrl(result, idea)}
         onClick={() => track('shared_on_x', resultParams(result))}
         target="_blank"
         rel="noopener noreferrer"

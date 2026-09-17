@@ -45,8 +45,18 @@ export function shareText(result: ResultModel): string {
   ].join('\n')
 }
 
-export function xIntentUrl(result: ResultModel): string {
-  const params = new URLSearchParams({ text: shareText(result), url: SITE_URL })
+const X_IDEA_MAX = 110
+
+/** Concise copy for X, including the evaluated idea without exhausting the character limit. */
+export function xShareText(result: ResultModel, idea: string): string {
+  const action = result.verdict === 'KILL' ? 'killed' : 'judged'
+  return [`I let an AI ${action} my startup idea:`, `“${cardIdea(idea, X_IDEA_MAX)}”`, '', `${result.score}/100 — ${verdictLabel(result.verdict)}`, '', 'Try yours:'].join(
+    '\n',
+  )
+}
+
+export function xIntentUrl(result: ResultModel, idea: string): string {
+  const params = new URLSearchParams({ text: xShareText(result, idea), url: SITE_URL })
   return `https://x.com/intent/post?${params}`
 }
 

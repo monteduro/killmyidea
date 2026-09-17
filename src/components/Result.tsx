@@ -103,7 +103,7 @@ export function Result({ result, idea, saved, debug, onAgain }: Props) {
           Show my idea on the card
         </label>
         <div className="mt-3">
-          <ShareActions result={result} cardRef={cardRef} />
+          <ShareActions result={result} idea={idea} cardRef={cardRef} />
         </div>
       </section>
 

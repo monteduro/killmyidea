@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { dimensionCopy, riskCopy, strengthCopy } from './copy'
 import { composeEvaluation } from './evaluate'
 import { DIMENSIONS, type DimensionKey } from './questions'
-import { bestAndWorst, cardIdea } from './share'
+import { bestAndWorst, cardIdea, xIntentUrl, xShareText } from './share'
 import type { Answer } from './typesafe'
 
 // Raw Jev 0-4 answers → composeEvaluation → score + verdict.
@@ -71,5 +71,24 @@ describe('cardIdea', () => {
     const out = cardIdea('word '.repeat(60))
     expect(out.length).toBeLessThanOrEqual(151)
     expect(out.endsWith('word…')).toBe(true)
+  })
+})
+
+describe('X sharing', () => {
+  const result = {
+    score: 42,
+    verdict: 'KILL' as const,
+    dimensions: { problem: 34, money: 19, buildable: 77 },
+    category: 'Consumer',
+  }
+
+  it('includes the idea in concise, readable share copy', () => {
+    expect(xShareText(result, 'An app for dogs')).toContain('“An app for dogs”')
+    const url = new URL(xIntentUrl(result, 'An app for dogs'))
+    expect(url.searchParams.get('text')).toContain('“An app for dogs”')
+  })
+
+  it('shortens a long idea for X', () => {
+    expect(xShareText(result, 'word '.repeat(60))).toContain('word…')
   })
 })
