@@ -176,6 +176,23 @@ export class EvaluationArchive {
       )
   }
 
+  /** Total archived evaluations. Cheap on SQLite, still cached by the caller. */
+  count(): number {
+    const row = this.db.prepare('SELECT COUNT(*) AS n FROM evaluations').get() as { n: number }
+    return row.n
+  }
+
+  /** Verdict totals across all archived evaluations. */
+  verdictCounts(): { KILL: number; FIX: number; SHIP: number } {
+    const rows = this.db.prepare('SELECT verdict, COUNT(*) AS n FROM evaluations GROUP BY verdict').all() as {
+      verdict: string
+      n: number
+    }[]
+    const verdicts = { KILL: 0, FIX: 0, SHIP: 0 }
+    for (const row of rows) if (row.verdict in verdicts) verdicts[row.verdict as keyof typeof verdicts] = row.n
+    return verdicts
+  }
+
   close() {
     this.db.close()
   }
@@ -183,8 +200,23 @@ export class EvaluationArchive {
 
 let archive: EvaluationArchive | undefined
 
+/** How long the in-memory idea count stays fresh. */
+export const COUNT_TTL_MS = 5 * 60 * 1000
+
+export type EvaluationStats = { count: number; verdicts: { KILL: number; FIX: number; SHIP: number } }
+
+let cachedStats: { value: EvaluationStats; at: number } | undefined
+
 /** Lazily opens one connection per server process. */
 export function saveEvaluation(record: ArchivedEvaluation) {
   archive ??= new EvaluationArchive()
   archive.save(record)
+}
+
+/** Idea count and verdict totals with a 5-minute in-memory cache: at most one query per process per interval. */
+export function evaluationStats(): EvaluationStats {
+  if (cachedStats && Date.now() - cachedStats.at < COUNT_TTL_MS) return cachedStats.value
+  archive ??= new EvaluationArchive()
+  cachedStats = { value: { count: archive.count(), verdicts: archive.verdictCounts() }, at: Date.now() }
+  return cachedStats.value
 }

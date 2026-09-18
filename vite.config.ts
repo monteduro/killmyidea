@@ -4,11 +4,16 @@ import react from '@vitejs/plugin-react'
 import type { IncomingMessage } from 'node:http'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 
-// Serves api/evaluate.ts during `npm run dev`, mirroring the Vercel function.
+// Serves api/evaluate.ts and api/stats.ts during `npm run dev`, mirroring the Vercel functions.
 function localApi(): Plugin {
   return {
     name: 'local-api',
     configureServer(server) {
+      const respond = async (res: import('node:http').ServerResponse, response: Response) => {
+        res.statusCode = response.status
+        response.headers.forEach((v, k) => res.setHeader(k, v))
+        res.end(await response.text())
+      }
       server.middlewares.use('/api/evaluate', async (req, res) => {
         try {
           const mod = await server.ssrLoadModule('/api/evaluate.ts')
@@ -20,9 +25,21 @@ function localApi(): Plugin {
           const response: Response = await mod.POST(
             new Request('http://localhost/api/evaluate', { method: 'POST', body, headers: { 'Content-Type': 'application/json' } }),
           )
-          res.statusCode = response.status
-          response.headers.forEach((v, k) => res.setHeader(k, v))
-          res.end(await response.text())
+          await respond(res, response)
+        } catch (err) {
+          server.ssrFixStacktrace(err as Error)
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: String(err) }))
+        }
+      })
+      server.middlewares.use('/api/stats', async (req, res) => {
+        try {
+          const mod = await server.ssrLoadModule('/api/stats.ts')
+          if (req.method !== 'GET') {
+            res.statusCode = 405
+            return res.end()
+          }
+          await respond(res, await mod.GET())
         } catch (err) {
           server.ssrFixStacktrace(err as Error)
           res.statusCode = 500

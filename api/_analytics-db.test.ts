@@ -100,6 +100,20 @@ describe('EvaluationArchive', () => {
     expect(row).toMatchObject({ scoring_version: 2, goal: 'open_source', money: null, adoption: 80, appeal: null, fun: null })
   })
 
+  it('counts stored evaluations and their verdicts', () => {
+    const path = tempDb()
+    const archive = new EvaluationArchive(path)
+    expect(archive.count()).toBe(0)
+    expect(archive.verdictCounts()).toEqual({ KILL: 0, FIX: 0, SHIP: 0 })
+    archive.save({ requestId: 'a', createdAt: '2026-09-18', idea: 'Idea one', evaluation: evaluation({ score: 30, verdict: 'KILL', dimensions: { ...DIMS } }) })
+    archive.save({ requestId: 'b', createdAt: '2026-09-18', idea: 'Idea two', evaluation: evaluation({ score: 55, verdict: 'FIX', dimensions: { ...DIMS } }) })
+    archive.save({ requestId: 'c', createdAt: '2026-09-18', idea: 'Idea three', evaluation: evaluation({ score: 80, verdict: 'SHIP', dimensions: { ...DIMS } }) })
+    archive.save({ requestId: 'd', createdAt: '2026-09-18', idea: 'Idea four', evaluation: evaluation({ score: 85, verdict: 'SHIP', dimensions: { ...DIMS } }) })
+    expect(archive.count()).toBe(4)
+    expect(archive.verdictCounts()).toEqual({ KILL: 1, FIX: 1, SHIP: 2 })
+    archive.close()
+  })
+
   it('migrates a table created before goals, keeping its rows', () => {
     const path = tempDb()
     const legacy = new DatabaseSync(path)

@@ -5,13 +5,17 @@ import { Logo } from './Logo'
 export function Header({
   showLogo,
   historyCount,
+  killedCount,
   onHome,
   onHistory,
+  onStats,
 }: {
   showLogo: boolean
   historyCount: number
+  killedCount: number | null
   onHome: () => void
   onHistory: () => void
+  onStats: () => void
 }) {
   return (
     <header className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-8 sm:pt-7">
@@ -23,6 +27,15 @@ export function Header({
         <span className="pt-1 font-mono text-[11px] uppercase tracking-widest opacity-60">v1 / jev-latest</span>
       )}
       <nav className="flex items-stretch gap-2">
+        {killedCount !== null && (
+          <button
+            onClick={onStats}
+            title="Verdict breakdown of all submitted ideas"
+            className="animate-rise cursor-pointer border-2 border-ink bg-ink px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-paper transition-colors hover:bg-kill hover:text-ink"
+          >
+            Analyzed<span className="ml-2 opacity-70 tabular-nums">{killedCount.toLocaleString('en-US')}</span>
+          </button>
+        )}
         <button
           onClick={onHistory}
           className="cursor-pointer border-2 border-current px-3 py-1.5 font-mono text-xs uppercase tracking-widest hover:bg-current/10"

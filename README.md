@@ -97,6 +97,7 @@ Different, Buildable, Shareable, plus Adoption, Immediate appeal and Fun for goa
 
 ```
 api/evaluate.ts           serverless endpoint (validate → Jev → score → respond)
+api/stats.ts              serverless endpoint (ideas submitted + verdict split, 5-min cache)
 api/_analytics-db.ts      SQLite archive for evaluation requests and scores
 api/_mock.ts              local-only fake answers
 src/lib/questions.ts      Jev questions

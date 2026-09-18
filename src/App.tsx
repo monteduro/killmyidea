@@ -5,9 +5,11 @@ import { HistoryDrawer } from './components/HistoryDrawer'
 import { IdeaForm } from './components/IdeaForm'
 import { Judging } from './components/Judging'
 import { Result } from './components/Result'
+import { StatsModal } from './components/StatsModal'
 import { trackIdeaSubmitted } from './lib/analytics'
 import { DEFAULT_GOAL, type Goal } from './lib/questions'
 import { ideaStore, toSavedIdea, type SavedIdea } from './lib/storage'
+import { fetchStats, type Stats } from './lib/stats'
 import type { EvaluateRequest, Evaluation, ResultModel } from './lib/types'
 
 type View = 'form' | 'judging' | 'result'
@@ -40,9 +42,14 @@ export default function App() {
   const [saved, setSaved] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [history, setHistory] = useState<SavedIdea[]>([])
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [statsOpen, setStatsOpen] = useState(false)
 
   const refreshHistory = useCallback(() => ideaStore.list().then(setHistory), [])
   useEffect(() => void refreshHistory(), [refreshHistory])
+
+  /** Browser HTTP cache (max-age=300) keeps this to one request per 5 minutes. */
+  useEffect(() => void fetchStats().then(setStats), [])
 
   useEffect(() => {
     document.body.dataset.mode = view === 'form' ? 'light' : 'dark'
@@ -97,8 +104,10 @@ export default function App() {
       <Header
         showLogo={view !== 'form'}
         historyCount={history.length}
+        killedCount={stats?.count ?? null}
         onHome={reset}
         onHistory={() => setHistoryOpen(true)}
+        onStats={() => setStatsOpen(true)}
       />
 
       <main className="flex-1">
@@ -132,6 +141,8 @@ export default function App() {
         onDelete={(id) => ideaStore.remove(id).then(refreshHistory)}
         onClear={() => ideaStore.clear().then(refreshHistory)}
       />
+
+      <StatsModal open={statsOpen} stats={stats} onClose={() => setStatsOpen(false)} />
     </div>
   )
 }
