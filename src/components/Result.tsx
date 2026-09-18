@@ -24,9 +24,51 @@ export function Result({ result, idea, saved, debug, onAgain, onRefine }: Props)
   const cardRef = useRef<HTMLDivElement>(null)
   const unclear = result.understandable != null && result.understandable < LOW_CLARITY_WARNING
   const evaluation = 'debug' in result ? (result as Evaluation) : null
-  const { best, worst } = bestAndWorst(result)
   const goal = goalTag(result)
   const [ideaOnCard, setIdeaOnCard] = useState(true)
+
+  if (result.needsDetail || unclear) {
+    return (
+      <article className="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8 sm:pt-12">
+        <section className="animate-rise border-l-4 border-paper pl-4 sm:pl-6">
+          <p className="font-mono text-[11px] uppercase tracking-widest opacity-60">
+            The idea · {result.category} {goal && <span>· {goal}</span>} {saved && <span>· saved to history</span>}
+          </p>
+          <p className="mt-2 max-w-4xl whitespace-pre-line text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+            “{idea}”
+          </p>
+        </section>
+
+        <h1 className="animate-rise mt-12 max-w-4xl text-[clamp(4rem,15vw,9rem)] font-black uppercase leading-[0.82] tracking-[-0.05em] text-fix">
+          Not enough detail
+        </h1>
+        <p role="status" className="mt-8 max-w-2xl border-2 border-fix px-4 py-3 font-mono text-sm text-fix">
+          {LOW_CLARITY_COPY[0]}
+          <br />
+          {LOW_CLARITY_COPY[1]}
+        </p>
+
+        <section className="mt-14 flex flex-col gap-3 border-t-2 border-paper pt-8 sm:flex-row">
+          <button
+            onClick={onRefine}
+            className="w-full cursor-pointer bg-paper px-6 py-5 text-2xl font-black uppercase tracking-tight text-ink transition-colors hover:bg-fix sm:w-auto"
+          >
+            Add more detail
+          </button>
+          <button
+            onClick={onAgain}
+            className="w-full cursor-pointer border-2 border-paper px-6 py-5 text-2xl font-black uppercase tracking-tight transition-colors hover:bg-paper hover:text-ink sm:w-auto"
+          >
+            Try another idea
+          </button>
+        </section>
+
+        {evaluation && <DebugPanel evaluation={evaluation} defaultOpen={debug} />}
+      </article>
+    )
+  }
+
+  const { best, worst } = bestAndWorst(result)
 
   return (
     <article className="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8 sm:pt-12">
@@ -55,14 +97,6 @@ export function Result({ result, idea, saved, debug, onAgain, onRefine }: Props)
       {result.latencyMs != null && (
         <p className="mt-6 font-mono text-sm sm:text-base">
           Jev made {result.decisions ?? DECISION_COUNT} decisions in <span className="font-bold">{result.latencyMs}ms</span>.
-        </p>
-      )}
-
-      {unclear && (
-        <p role="status" className="mt-6 border-2 border-fix px-4 py-3 font-mono text-sm text-fix">
-          {LOW_CLARITY_COPY[0]}
-          <br />
-          {LOW_CLARITY_COPY[1]}
         </p>
       )}
 
@@ -125,7 +159,7 @@ export function Result({ result, idea, saved, debug, onAgain, onRefine }: Props)
 
 function Legend({ goal }: { goal?: Goal }) {
   const keys = dimensionsFor(goal)
-  const doubled = keys.filter((k) => k !== 'problem' && WEIGHTS[k] > 1).map((k) => DIMENSION_LABELS[k])
+  const doubled = keys.filter((k) => WEIGHTS[k] > 1).map((k) => DIMENSION_LABELS[k])
   return (
     <div className="mt-8 border-t border-paper/20 pt-5">
       <h3 className="font-mono text-[11px] uppercase tracking-widest opacity-60">What these mean</h3>
@@ -141,8 +175,8 @@ function Legend({ goal }: { goal?: Goal }) {
         ))}
       </dl>
       <p className="mt-4 font-mono text-[11px] leading-relaxed opacity-60">
-        Jev rates each question 0–4, shown as 0–100. The score is their average ({totalWeight(keys)} parts: Problem and{' '}
-        {doubled.join(', ')} count double).
+        Jev rates each question 0–4, shown as 0–100. The score is their average ({totalWeight(keys)} parts: {doubled.join(' and ')}{' '}
+        count double).
         <br />
         Under {VERDICT_THRESHOLDS.fix} KILL · {VERDICT_THRESHOLDS.fix}–{VERDICT_THRESHOLDS.ship - 1} FIX ·{' '}
         {VERDICT_THRESHOLDS.ship}+ SHIP.

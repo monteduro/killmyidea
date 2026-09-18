@@ -1,0 +1,92 @@
+[
+  {
+    "id": "saas-01",
+    "category": "SaaS",
+    "idea": "A subscription dashboard for independent gyms that combines class bookings, failed-payment recovery and member churn alerts. Owners connect Stripe and their calendar, then get a daily list of members to contact."
+  },
+  {
+    "id": "saas-02",
+    "category": "SaaS",
+    "idea": "A lightweight approval workspace for small architecture studios. Clients review drawings in the browser, pin feedback to a version and approve it, replacing scattered email threads and avoiding work on outdated files."
+  },
+  {
+    "id": "consumer-01",
+    "category": "Consumer",
+    "idea": "A mobile pantry assistant for people who forget what food they already own. Users photograph a grocery receipt, receive expiry reminders and get simple meal suggestions based only on ingredients currently at home."
+  },
+  {
+    "id": "consumer-02",
+    "category": "Consumer",
+    "idea": "An app for long-distance friends that schedules one small shared ritual each week, such as answering the same prompt or taking a photo at noon, then turns the responses into a private monthly recap."
+  },
+  {
+    "id": "marketplace-01",
+    "category": "Marketplace",
+    "idea": "A local marketplace connecting restaurants with vetted technicians for urgent refrigeration repairs. Restaurants post the fault and photos, nearby technicians quote an arrival time and price, and payment is released after the repair."
+  },
+  {
+    "id": "marketplace-02",
+    "category": "Marketplace",
+    "idea": "A marketplace where small ecommerce brands rent unused product-photography props and backdrops from nearby studios. The platform handles availability, deposits, pickup windows and damage claims."
+  },
+  {
+    "id": "developer-tool-01",
+    "category": "Developer Tool",
+    "idea": "An open-source CLI that records the database queries triggered by a test suite, compares them with the main branch and fails CI when a pull request introduces an N+1 query or a large latency regression."
+  },
+  {
+    "id": "developer-tool-02",
+    "category": "Developer Tool",
+    "idea": "A hosted service that creates short-lived preview databases for every pull request, copies a privacy-safe subset of production data and posts connection details plus schema differences back to GitHub."
+  },
+  {
+    "id": "ai-01",
+    "category": "AI",
+    "idea": "An AI assistant for insurance brokers that reads incoming policy PDFs, extracts exclusions and renewal dates with citations, and flags differences against the previous policy before a human sends advice to the client."
+  },
+  {
+    "id": "ai-02",
+    "category": "AI",
+    "idea": "A voice practice coach for job candidates that runs a ten-minute mock interview, detects vague answers and produces a transcript with specific moments to rewrite. Users choose the role and paste the job description."
+  },
+  {
+    "id": "social-01",
+    "category": "Social",
+    "idea": "A private social app for amateur football teams where players share match photos, vote for playful awards and keep a season timeline. Only invited teammates can view or contribute."
+  },
+  {
+    "id": "social-02",
+    "category": "Social",
+    "idea": "A neighborhood skill-swap network where residents offer one-hour lessons such as bicycle repair or sourdough baking, request another skill in return and build trust through completed exchanges."
+  },
+  {
+    "id": "ecommerce-01",
+    "category": "Ecommerce",
+    "idea": "An online shop selling replacement buttons, zippers and repair patches matched to popular outdoor jackets. Shoppers select their jacket model and color, then receive the correct part with a short repair guide."
+  },
+  {
+    "id": "ecommerce-02",
+    "category": "Ecommerce",
+    "idea": "A direct-to-consumer store for modular desk organizers made from recycled plastic. Customers configure the tray layout online, see the exact dimensions and receive pieces that snap together without tools."
+  },
+  {
+    "id": "fintech-01",
+    "category": "Fintech",
+    "idea": "A cash-flow tool for freelance translators that imports invoices and bank transactions, predicts tax obligations and shows the amount safe to spend. It does not move money or provide investment advice."
+  },
+  {
+    "id": "fintech-02",
+    "category": "Fintech",
+    "idea": "A reconciliation service for small charities that matches donation-platform payouts to individual donors and accounting entries, then highlights fees, refunds and unmatched transfers for the treasurer."
+  },
+  {
+    "id": "other-01",
+    "category": "Other",
+    "idea": "A kit for museums to create tactile replicas of selected exhibits for visually impaired visitors. Staff upload a 3D scan, choose labels and materials, and receive a durable model plus an accessibility guide."
+  },
+  {
+    "id": "other-02",
+    "category": "Other",
+    "idea": "A weekend workshop service that helps apartment residents measure noise transmission between rooms and install removable acoustic improvements without modifying walls or upsetting a landlord."
+  }
+]

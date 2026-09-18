@@ -6,6 +6,10 @@ import type { Verdict } from './verdict.js'
 export type ResultModel = {
   score: number
   verdict: Verdict
+  /** When true, the score is retained for analysis but no verdict is presented to the user. */
+  needsDetail?: boolean
+  /** Version of the questions, weights, thresholds and result gating. */
+  scoringVersion?: number
   /** Missing on ideas saved before goals existed, which were all judged as "money". */
   goal?: Goal
   /** Dimension key → 0-100 */
@@ -37,6 +41,8 @@ export type EvaluationDebug = {
 }
 
 export type Evaluation = ResultModel & {
+  needsDetail: boolean
+  scoringVersion: number
   goal: Goal
   understandable: number
   decisions: number

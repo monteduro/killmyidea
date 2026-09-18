@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { composeEvaluation, validateGoal, validateIdea } from './evaluate'
 import { DECISION_COUNT, DIMENSIONS, dimensionsFor, GOALS, questionsFor } from './questions'
+import { SCORING_VERSION } from './scoring'
 import type { Answer } from './typesafe'
 
 function response(score: number, understandable: number, category = 'Consumer', keys: readonly string[] = DIMENSIONS) {
@@ -23,12 +24,20 @@ describe('validateIdea', () => {
 describe('composeEvaluation', () => {
   it('averages the answers and picks the verdict', () => {
     const e = composeEvaluation(response(3, 0.9), 120)
-    expect(e).toMatchObject({ score: 75, verdict: 'SHIP', decisions: DECISION_COUNT, latencyMs: 120 })
+    expect(e).toMatchObject({
+      score: 75,
+      verdict: 'SHIP',
+      needsDetail: false,
+      scoringVersion: SCORING_VERSION,
+      decisions: DECISION_COUNT,
+      latencyMs: 120,
+    })
   })
-  it('does not penalise unclear ideas, only reports it', () => {
+  it('retains the raw score but withholds the result for unclear ideas', () => {
     const e = composeEvaluation(response(3, 0.1), 120)
     expect(e.score).toBe(75)
     expect(e.understandable).toBe(0.1)
+    expect(e.needsDetail).toBe(true)
   })
   it('falls back to Other for unknown categories', () => {
     expect(composeEvaluation(response(2, 0.9, 'Robots'), 1).category).toBe('Other')
@@ -45,12 +54,18 @@ describe('goals', () => {
     expect(validateGoal('world_domination').ok).toBe(false)
   })
 
-  it('only swaps the Money question', () => {
+  it('uses the questions that fit each goal without changing the decision count', () => {
     expect(dimensionsFor('money')).toEqual([...DIMENSIONS])
     expect(dimensionsFor('open_source')).toEqual(DIMENSIONS.map((k) => (k === 'money' ? 'adoption' : k)))
-    expect(dimensionsFor('fun')).toEqual(DIMENSIONS.map((k) => (k === 'money' ? 'fun' : k)))
+    expect(dimensionsFor('fun')).toEqual(
+      DIMENSIONS.map((k) => (k === 'problem' ? 'appeal' : k === 'money' ? 'fun' : k)),
+    )
     for (const goal of GOALS) expect(Object.keys(questionsFor(goal))).toHaveLength(DECISION_COUNT)
     expect(questionsFor('open_source')).not.toHaveProperty('money')
+    expect(questionsFor('fun')).not.toHaveProperty('problem')
+    expect(questionsFor('fun')).not.toHaveProperty('money')
+    expect(questionsFor('fun')).toHaveProperty('appeal')
+    expect(questionsFor('fun')).toHaveProperty('fun')
   })
 
   it('scores open source ideas on Adoption instead of Money', () => {
@@ -62,6 +77,19 @@ describe('goals', () => {
     expect(Object.keys(e.dimensions)).toEqual(keys)
     expect(e.dimensions).toMatchObject({ adoption: 100 })
     expect(e.score).toBe(60) // (50 × 8 + 100 × 2) / 10
+  })
+
+  it('scores fun ideas on Appeal and Fun instead of Problem and Money', () => {
+    const keys = dimensionsFor('fun')
+    const r = response(2, 0.9, 'Consumer', keys)
+    r.answers.appeal = { type: 'score', score: 4, confidence: 0.9, legend: {}, probabilities: {} }
+    r.answers.fun = { type: 'score', score: 4, confidence: 0.9, legend: {}, probabilities: {} }
+    const e = composeEvaluation(r, 1, false, 'fun')
+    expect(Object.keys(e.dimensions)).toEqual(keys)
+    expect(e.dimensions).toMatchObject({ appeal: 100, fun: 100 })
+    expect(e.dimensions).not.toHaveProperty('problem')
+    expect(e.dimensions).not.toHaveProperty('money')
+    expect(e.score).toBe(70) // (50 × 6 + 100 × 4) / 10
   })
 
   it('needs the answer for the goal question', () => {

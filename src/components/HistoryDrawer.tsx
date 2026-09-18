@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { LOW_CLARITY_WARNING } from '../lib/scoring'
 import type { SavedIdea } from '../lib/storage'
 import { verdictBg } from '../lib/ui'
 
@@ -49,12 +50,20 @@ export function HistoryDrawer({ open, items, onClose, onOpen, onDelete, onClear 
                   onClick={() => onOpen(item)}
                   className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-5 py-3 text-left hover:bg-ink/5"
                 >
-                  <span className="w-9 shrink-0 text-2xl font-black tabular-nums">{item.score}</span>
-                  <span
-                    className={`w-12 shrink-0 py-0.5 text-center font-mono text-[10px] font-bold tracking-widest ${verdictBg[item.verdict]}`}
-                  >
-                    {item.verdict}
-                  </span>
+                  {item.needsDetail || (item.understandable != null && item.understandable < LOW_CLARITY_WARNING) ? (
+                    <span className="w-[5.25rem] shrink-0 bg-fix py-0.5 text-center font-mono text-[10px] font-bold tracking-widest">
+                      DETAIL
+                    </span>
+                  ) : (
+                    <>
+                      <span className="w-9 shrink-0 text-2xl font-black tabular-nums">{item.score}</span>
+                      <span
+                        className={`w-12 shrink-0 py-0.5 text-center font-mono text-[10px] font-bold tracking-widest ${verdictBg[item.verdict]}`}
+                      >
+                        {item.verdict}
+                      </span>
+                    </>
+                  )}
                   <span className="min-w-0 truncate text-sm">{item.idea}</span>
                 </button>
                 <button

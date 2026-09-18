@@ -61,4 +61,44 @@ describe('POST /api/evaluate goal', () => {
 
     expect((await post('crypto')).status).toBe(400)
   })
+
+  it('uses Appeal and Fun for fun ideas', async () => {
+    vi.stubEnv('TYPESAFE_MOCK', '1')
+    vi.stubEnv('VERCEL', '')
+    const res = await POST(
+      new Request('http://localhost/api/evaluate', {
+        method: 'POST',
+        body: JSON.stringify({
+          idea: 'A playful browser toy that turns every typed sentence into a tiny animated creature.',
+          goal: 'fun',
+          doNotArchive: true,
+        }),
+      }),
+    )
+    const body = await res.json()
+    expect(res.status).toBe(200)
+    expect(body.scoringVersion).toBe(2)
+    expect(body.dimensions).toHaveProperty('appeal')
+    expect(body.dimensions).toHaveProperty('fun')
+    expect(body.dimensions).not.toHaveProperty('problem')
+    expect(body.dimensions).not.toHaveProperty('money')
+  })
+})
+
+describe('POST /api/evaluate clarity gate', () => {
+  it('keeps the raw result but marks an unclear idea as needing detail', async () => {
+    vi.stubEnv('TYPESAFE_MOCK', '1')
+    vi.stubEnv('VERCEL', '')
+    const res = await POST(
+      new Request('http://localhost/api/evaluate', {
+        method: 'POST',
+        body: JSON.stringify({ idea: 'A mysterious thing!!', doNotArchive: true }),
+      }),
+    )
+    const body = await res.json()
+    expect(res.status).toBe(200)
+    expect(body.needsDetail).toBe(true)
+    expect(body.score).toEqual(expect.any(Number))
+    expect(body.verdict).toMatch(/^(KILL|FIX|SHIP)$/)
+  })
 })

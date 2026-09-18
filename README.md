@@ -7,7 +7,7 @@ questions in parallel: 8 plain indie-hacker questions scored 0–4, plus the
 category and whether the idea is understandable.
 
 ```
-idea → Jev (8 scores) → each × 25 → average (Problem, Money ×2) → KILL / FIX / SHIP
+idea → Jev (8 scores) → each × 25 → weighted average → clarity gate → KILL / FIX / SHIP
 ```
 
 ## 1. Install
@@ -44,6 +44,7 @@ ignored on Vercel.
 ```bash
 npm run dev          # http://127.0.0.1:5317 (serves /api/evaluate too)
 npm test             # unit tests
+npm run benchmark    # balanced scoring benchmark; requires the app to be running
 ```
 
 Every result has a collapsed "How Jev decided" panel with raw Jev answers, probabilities, confidence,
@@ -73,20 +74,23 @@ the archive adapter before relying on the collected data there.
 `src/lib/scoring.ts` and `src/lib/verdict.ts`. That's all there is:
 
 - each question: Jev score 0–4 × 25 → 0–100
-- **score = average of the 8 questions, with Problem and Money counting double** (`WEIGHTS`)
-- the goal picked in the form swaps Money for another double-weight question:
-  **Make money** → Money · **Open source** → Adoption · **Just for fun** → Fun
-  (`GOAL_DIMENSION`). The API takes `goal` (`money` default, `open_source`, `fun`).
+- **score = weighted average of the 8 questions** (`WEIGHTS`)
+- **Make money** weights Real problem and Money twice; **Open source** replaces Money with
+  Adoption; **Just for fun** replaces Real problem and Money with Immediate appeal and Fun.
+  The two goal-defining questions always count twice. The API takes `goal`
+  (`money` default, `open_source`, `fun`).
 - **KILL** below 50 · **FIX** 50–64 · **SHIP** 65+ (`VERDICT_THRESHOLDS`)
+- if understandability is below 0.3, the raw scores are retained for analysis but the UI
+  asks for more detail instead of presenting a score or verdict
+- `SCORING_VERSION` identifies the exact questions, weights, thresholds and gating semantics
 
 BEST SIGNAL / BIGGEST RISK are the highest / lowest question, with fixed copy in
-`src/lib/copy.ts`. The understandability check never changes the score; below
-0.3 it only shows "add more detail".
+`src/lib/copy.ts`.
 
 ## 7. Jev questions
 
 `src/lib/questions.ts`: Real problem, Clear customer, Demand, Money, Reach,
-Different, Buildable, Shareable, plus Adoption and Fun for the non-money goals. Each has five levels written as concrete situations
+Different, Buildable, Shareable, plus Adoption, Immediate appeal and Fun for goal-specific scoring. Each has five levels written as concrete situations
 (Jev judges each level on its own). The HTTP client is `src/lib/typesafe.ts`.
 
 ## Layout
@@ -103,6 +107,8 @@ src/lib/storage.ts        history (IdeaStore interface, localStorage implementat
 src/lib/share.ts          share text and X intent URL
 src/lib/features.ts       public site and repository URLs
 src/components/           UI
+benchmarks/cases.json     balanced, synthetic benchmark cases
+scripts/run-scoring-benchmark.mjs  benchmark runner and summary
 ```
 
 ## Analytics (DataFast, cookieless)
@@ -119,8 +125,8 @@ There is one custom goal (`src/lib/analytics.ts`): `idea_submitted`, with
 ## Evaluation archive (SQLite)
 
 Unless the user checks the opt-out, each successful evaluation creates one row
-in the `evaluations` table. It includes the idea, total score, verdict, category,
-all eight dimension scores, understandability, latency, model, token usage and
+in the `evaluations` table. It includes the idea, scoring version, total score,
+raw verdict, clarity-gate status, category, all eight dimension scores, understandability, latency, model, token usage and
 the complete diagnostic response JSON. It deliberately excludes IP addresses,
 cookies and browser identifiers.
 
@@ -128,8 +134,29 @@ For example:
 
 ```bash
 sqlite3 data/analytics.sqlite \
-  'SELECT verdict, COUNT(*), ROUND(AVG(score), 1) FROM evaluations GROUP BY verdict;'
+  'SELECT scoring_version, goal, COUNT(*), ROUND(AVG(score), 1) FROM evaluations GROUP BY scoring_version, goal;'
 ```
+
+Rows collected before scoring v2 are migrated without being reinterpreted: they remain
+`scoring_version = 1`, while v2 stores the new `appeal` score for fun ideas. To export:
+
+```bash
+sqlite3 -header -csv data/analytics.sqlite 'SELECT * FROM evaluations;' > evaluations.csv
+```
+
+## Scoring benchmark
+
+`benchmarks/cases.json` contains two similarly detailed, synthetic ideas for each category.
+The runner evaluates every case against all three goals and always sends `doNotArchive: true`.
+With the app running against Jev:
+
+```bash
+BENCHMARK_RUNS=3 npm run benchmark
+```
+
+It reports score and verdict distributions by goal, category accuracy, clarity gates and
+repeat-score range. The full JSON is written to the ignored
+`benchmarks/results/latest.json`; set `BENCHMARK_URL` to test a deployed instance.
 
 `.mcp.json` registers the official DataFast MCP server (`https://datafa.st/api/mcp`).
 In Claude Code, run `/mcp` and sign in with OAuth to query these analytics.

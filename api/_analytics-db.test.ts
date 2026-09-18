@@ -21,6 +21,8 @@ describe('EvaluationArchive', () => {
     const evaluation: Evaluation = {
       score: 61,
       verdict: 'FIX',
+      needsDetail: false,
+      scoringVersion: 2,
       goal: 'money',
       dimensions: {
         problem: 75,
@@ -72,7 +74,10 @@ describe('EvaluationArchive', () => {
       input_tokens: 123,
       output_tokens: 45,
       goal: 'money',
+      scoring_version: 2,
+      needs_detail: 0,
       problem: 75,
+      appeal: null,
       money: 50,
       adoption: null,
       buildable: 100,
@@ -92,7 +97,7 @@ describe('EvaluationArchive', () => {
     archive.close()
 
     const row = readRows(path)[0]
-    expect(row).toMatchObject({ goal: 'open_source', money: null, adoption: 80, fun: null })
+    expect(row).toMatchObject({ scoring_version: 2, goal: 'open_source', money: null, adoption: 80, appeal: null, fun: null })
   })
 
   it('migrates a table created before goals, keeping its rows', () => {
@@ -121,14 +126,62 @@ describe('EvaluationArchive', () => {
       requestId: 'new',
       createdAt: '2026-09-17',
       idea: 'A fun idea',
-      evaluation: evaluation({ goal: 'fun', dimensions: { ...DIMS, fun: 90 } }),
+      evaluation: evaluation({
+        goal: 'fun',
+        dimensions: { appeal: 50, customer: 50, demand: 50, fun: 90, reach: 50, different: 50, buildable: 50, shareable: 50 },
+      }),
     })
     archive.close()
 
     const rows = readRows(path)
     expect(rows).toHaveLength(2)
-    expect(rows[0]).toMatchObject({ request_id: 'old', goal: 'money', money: 22, fun: null })
-    expect(rows[1]).toMatchObject({ request_id: 'new', goal: 'fun', money: null, fun: 90 })
+    expect(rows[0]).toMatchObject({ request_id: 'old', scoring_version: 1, needs_detail: 0, goal: 'money', money: 22, appeal: null, fun: null })
+    expect(rows[1]).toMatchObject({ request_id: 'new', scoring_version: 2, goal: 'fun', problem: null, money: null, appeal: 50, fun: 90 })
+  })
+
+  it('migrates the goal-aware v1 production schema to scoring v2', () => {
+    const path = tempDb()
+    const v1 = new DatabaseSync(path)
+    v1.exec(`
+      CREATE TABLE evaluations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, request_id TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL,
+        idea TEXT NOT NULL, idea_length INTEGER NOT NULL, score INTEGER NOT NULL, verdict TEXT NOT NULL,
+        category TEXT NOT NULL, understandable REAL NOT NULL, decisions INTEGER NOT NULL,
+        latency_ms INTEGER NOT NULL, model TEXT NOT NULL, mock INTEGER NOT NULL, input_tokens INTEGER,
+        output_tokens INTEGER, goal TEXT NOT NULL DEFAULT 'money', problem INTEGER NOT NULL,
+        customer INTEGER NOT NULL, demand INTEGER NOT NULL, money INTEGER, adoption INTEGER, fun INTEGER,
+        reach INTEGER NOT NULL, different INTEGER NOT NULL, buildable INTEGER NOT NULL,
+        shareable INTEGER NOT NULL, debug_json TEXT NOT NULL
+      ) STRICT;
+      INSERT INTO evaluations VALUES (
+        NULL, 'v1-fun', '2026-09-17', 'A fun v1 idea', 13, 57, 'FIX', 'Consumer', 0.2, 10, 100,
+        'jev', 0, NULL, NULL, 'fun', 25, 50, 50, NULL, NULL, 75, 50, 50, 75, 50, '{}'
+      );
+    `)
+    v1.close()
+
+    const archive = new EvaluationArchive(path)
+    archive.save({
+      requestId: 'v2-fun',
+      createdAt: '2026-09-18',
+      idea: 'A fun v2 idea',
+      evaluation: evaluation({
+        goal: 'fun',
+        dimensions: { appeal: 75, customer: 50, demand: 50, fun: 75, reach: 50, different: 50, buildable: 50, shareable: 50 },
+      }),
+    })
+    archive.close()
+
+    const rows = readRows(path)
+    expect(rows[0]).toMatchObject({ request_id: 'v1-fun', scoring_version: 1, needs_detail: 1, problem: 25, appeal: null, fun: 75 })
+    expect(rows[1]).toMatchObject({ request_id: 'v2-fun', scoring_version: 2, problem: null, appeal: 75, fun: 75 })
+
+    const db = new DatabaseSync(path, { readOnly: true })
+    const problem = db.prepare("SELECT \"notnull\" FROM pragma_table_info('evaluations') WHERE name = 'problem'").get() as {
+      notnull: number
+    }
+    db.close()
+    expect(problem.notnull).toBe(0)
   })
 })
 
@@ -151,6 +204,8 @@ function evaluation(overrides: Partial<Evaluation>): Evaluation {
   return {
     score: 50,
     verdict: 'FIX',
+    needsDetail: false,
+    scoringVersion: 2,
     goal: 'money',
     dimensions: {},
     category: 'Other',

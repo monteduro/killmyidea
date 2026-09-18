@@ -4,6 +4,9 @@ import { STORAGE_KEY, deserializeIdeas, localIdeaStore, serializeIdeas, toSavedI
 const result = {
   score: 74,
   verdict: 'SHIP' as const,
+  needsDetail: false,
+  scoringVersion: 2,
+  goal: 'money' as const,
   dimensions: { problem: 91, different: 43 },
   category: 'Consumer',
   latencyMs: 143,
@@ -29,6 +32,7 @@ describe('serialization', () => {
     const back = deserializeIdeas(serializeIdeas([saved]))
     expect(back).toEqual([saved])
     expect(back[0].createdAt).toBe('2026-09-17T10:00:00.000Z')
+    expect(back[0]).toMatchObject({ needsDetail: false, scoringVersion: 2, goal: 'money' })
   })
   it('ignores corrupt data and invalid entries', () => {
     expect(deserializeIdeas(null)).toEqual([])

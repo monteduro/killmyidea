@@ -19,7 +19,7 @@ export function DebugPanel({ evaluation, defaultOpen = false }: { evaluation: Ev
       </summary>
       <div className="space-y-6 overflow-x-auto p-4">
         <p>
-          model={d.model} goal={GOAL_LABELS[evaluation.goal]} latency={d.latencyMs}ms usage=
+          model={d.model} scoring=v{evaluation.scoringVersion} goal={GOAL_LABELS[evaluation.goal]} latency={d.latencyMs}ms usage=
           {d.usage ? `in:${d.usage.input_tokens} out:${d.usage.output_tokens}` : 'n/a'}
         </p>
 
@@ -52,8 +52,14 @@ export function DebugPanel({ evaluation, defaultOpen = false }: { evaluation: Ev
           score = ({d.dimensions.map((r) => `${r.normalized}×${WEIGHTS[r.key as DimensionKey] ?? 1}`).join(' + ')}) /{' '}
           {totalWeight(dimensionsFor(evaluation.goal))} = <b>{evaluation.score}</b>
           <br />
-          verdict: KILL &lt;{VERDICT_THRESHOLDS.fix} · FIX {VERDICT_THRESHOLDS.fix}–{VERDICT_THRESHOLDS.ship - 1} · SHIP{' '}
-          {VERDICT_THRESHOLDS.ship}+ → <b>{evaluation.verdict}</b>
+          {evaluation.needsDetail ? (
+            <>result withheld: understandable below the clarity gate</>
+          ) : (
+            <>
+              verdict: KILL &lt;{VERDICT_THRESHOLDS.fix} · FIX {VERDICT_THRESHOLDS.fix}–{VERDICT_THRESHOLDS.ship - 1} · SHIP{' '}
+              {VERDICT_THRESHOLDS.ship}+ → <b>{evaluation.verdict}</b>
+            </>
+          )}
           <br />
           category = {d.category.choice} (conf {f(d.category.confidence, 2)}) · understandable = {f(d.understandable, 2)}
         </p>

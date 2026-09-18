@@ -1,6 +1,6 @@
 // Server-side pipeline: validate → ask Jev → 0-100 per question → average → verdict.
 import { CATEGORIES, DECISION_COUNT, DEFAULT_GOAL, dimensionsFor, isGoal, type Goal } from './questions.js'
-import { averageScore, normalizeScore } from './scoring.js'
+import { averageScore, LOW_CLARITY_WARNING, normalizeScore, SCORING_VERSION } from './scoring.js'
 import { readChoice, readNoul, readScore, type SystemOneResponse } from './typesafe.js'
 import type { Evaluation } from './types.js'
 import { getVerdict } from './verdict.js'
@@ -42,10 +42,13 @@ export function composeEvaluation(
   const category = readChoice(answers, 'category', CATEGORIES, 'Other')
   const understandable = readNoul(answers, 'is_understandable')
   const score = averageScore(dimensions, keys)
+  const needsDetail = understandable < LOW_CLARITY_WARNING
 
   return {
     score,
     verdict: getVerdict(score),
+    needsDetail,
+    scoringVersion: SCORING_VERSION,
     goal,
     dimensions,
     category: category.choice,

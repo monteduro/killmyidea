@@ -90,7 +90,7 @@ export function IdeaForm(p: Props) {
           ))}
         </div>
         <p className="mt-1 font-mono text-[11px] leading-snug opacity-60">
-          Not about money? Jev swaps the Money question for Adoption or Fun.
+          Jev adapts the weighted questions to what success means for you.
         </p>
       </fieldset>
 

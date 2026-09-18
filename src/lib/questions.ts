@@ -4,7 +4,7 @@
 // from 0 to 4. Jev judges each level on its own, so every level is a complete
 // situation. The idea is sent as `state.startup_idea`.
 //
-// The goal picked in the form only swaps the Money question for one that fits.
+// The goal picked in the form swaps questions that do not fit that goal.
 
 /** Questions for the default "Make money" goal, in display order. */
 export const DIMENSIONS = [
@@ -18,8 +18,8 @@ export const DIMENSIONS = [
   'shareable',
 ] as const
 
-/** Replacements for Money when the idea isn't meant to make money. */
-export const GOAL_DIMENSIONS = ['adoption', 'fun'] as const
+/** Goal-specific replacements for questions that do not fit. */
+export const GOAL_DIMENSIONS = ['adoption', 'appeal', 'fun'] as const
 
 export type DimensionKey = (typeof DIMENSIONS)[number] | (typeof GOAL_DIMENSIONS)[number]
 
@@ -40,11 +40,22 @@ export const GOAL_DIMENSION: Record<Goal, DimensionKey> = {
   fun: 'fun',
 }
 
+/** Fun projects need an immediate hook, not a painful real-world problem. */
+export const PROBLEM_DIMENSION: Record<Goal, DimensionKey> = {
+  money: 'problem',
+  open_source: 'problem',
+  fun: 'appeal',
+}
+
 export const isGoal = (v: unknown): v is Goal => (GOALS as readonly unknown[]).includes(v)
 
 /** The eight scored questions for a goal, in display order. */
 export const dimensionsFor = (goal: Goal = DEFAULT_GOAL): DimensionKey[] =>
-  DIMENSIONS.map((k) => (k === 'money' ? GOAL_DIMENSION[goal] : k))
+  DIMENSIONS.map((k) => {
+    if (k === 'problem') return PROBLEM_DIMENSION[goal]
+    if (k === 'money') return GOAL_DIMENSION[goal]
+    return k
+  })
 
 export const DIMENSION_LABELS: Record<DimensionKey, string> = {
   problem: 'Real problem',
@@ -56,6 +67,7 @@ export const DIMENSION_LABELS: Record<DimensionKey, string> = {
   buildable: 'Buildable',
   shareable: 'Shareable',
   adoption: 'Adoption',
+  appeal: 'Immediate appeal',
   fun: 'Fun',
 }
 
@@ -70,6 +82,7 @@ export const DIMENSION_HINTS: Record<DimensionKey, string> = {
   buildable: 'Can 1–2 devs ship a first version fast?',
   shareable: 'Would users tell or show other people?',
   adoption: 'Would developers use, star and contribute to it?',
+  appeal: 'Would people immediately want to try it?',
   fun: 'Would people enjoy playing with it?',
 }
 
@@ -159,7 +172,12 @@ const scoreQuestions: Record<DimensionKey, ScoreQuestion> = {
   },
   buildable: {
     type: 'score',
-    instructions: 'How easily could one or two developers build a first version of `startup_idea`?',
+    // A plausible "it already works" claim settles the question: it has been built by one or two
+    // people. The plausibility clause keeps a gigafactory from scoring high just by claiming to exist.
+    instructions:
+      'How easily could one or two developers build a first version of `startup_idea`? ' +
+      'If `startup_idea` says a working version already exists, is live or is in use, and that claim ' +
+      'is plausible for one or two developers, it is proven buildable: use the highest level.',
     criteria: [
       'Needs a big team, heavy capital or breakthroughs.',
       'Months of hard work with serious technical risk.',
@@ -189,6 +207,18 @@ const scoreQuestions: Record<DimensionKey, ScoreQuestion> = {
       'A small group would use it and occasionally star it.',
       'Developers would use it regularly and some would contribute.',
       'It fills a gap so clearly that people would adopt, star and help maintain it.',
+    ],
+  },
+  appeal: {
+    type: 'score',
+    instructions:
+      'As a just-for-fun project, how strongly would `startup_idea` make someone want to try it immediately?',
+    criteria: [
+      'There is no clear hook and almost nobody would try it.',
+      'The premise creates mild curiosity, but not enough to take action.',
+      'People would try it once if it appeared in front of them.',
+      'The hook is easy to understand and makes people actively want to try it.',
+      'The premise is instantly irresistible; people would stop what they are doing to try it.',
     ],
   },
   fun: {
@@ -237,5 +267,5 @@ export function questionsFor(goal: Goal = DEFAULT_GOAL): Record<string, JevQuest
 
 export const QUESTIONS = questionsFor(DEFAULT_GOAL)
 
-/** Same for every goal: the goal swaps a question, it never adds one. */
+/** Same for every goal: goal-specific questions replace shared slots, never add decisions. */
 export const DECISION_COUNT = Object.keys(QUESTIONS).length

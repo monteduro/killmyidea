@@ -6,6 +6,7 @@ import { dimensionsFor, type DimensionKey } from './questions.js'
  */
 export const WEIGHTS: Record<DimensionKey, number> = {
   problem: 2,
+  appeal: 2,
   customer: 1,
   demand: 1,
   money: 2,
@@ -16,6 +17,9 @@ export const WEIGHTS: Record<DimensionKey, number> = {
   adoption: 2,
   fun: 2,
 }
+
+/** Increment whenever questions, weights, thresholds or gating semantics change. */
+export const SCORING_VERSION = 2
 
 /** Highest level of every Score rubric (five levels: 0-4). */
 export const MAX_LEVEL = 4

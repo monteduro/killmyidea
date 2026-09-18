@@ -10,6 +10,8 @@ export type SavedIdea = {
   createdAt: string
   score: number
   verdict: Verdict
+  needsDetail?: boolean
+  scoringVersion?: number
   goal?: Goal
   dimensions: Record<string, number>
   category: string
@@ -36,6 +38,8 @@ export function toSavedIdea(idea: string, result: ResultModel, now = new Date())
     createdAt: now.toISOString(),
     score: result.score,
     verdict: result.verdict,
+    needsDetail: result.needsDetail,
+    scoringVersion: result.scoringVersion,
     goal: result.goal,
     dimensions: { ...result.dimensions },
     category: result.category,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DIMENSIONS } from './questions'
+import { DIMENSIONS, dimensionsFor } from './questions'
 import { averageScore, normalizeScore, rankDimensions, type Normalized } from './scoring'
 import { getVerdict } from './verdict'
 
@@ -31,6 +31,13 @@ describe('averageScore', () => {
     const w = all(0)
     w.shareable = 100
     expect(averageScore(w)).toBe(10) // 100 / 10
+  })
+  it('counts Appeal and Fun double for fun ideas', () => {
+    const keys = dimensionsFor('fun')
+    const v = Object.fromEntries(keys.map((key) => [key, 0])) as Normalized
+    v.appeal = 100
+    v.fun = 100
+    expect(averageScore(v, keys)).toBe(40)
   })
   it('rounds to the nearest integer', () => {
     const v = all(60)

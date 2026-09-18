@@ -11,6 +11,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "benchmark": "node scripts/run-scoring-benchmark.mjs",
     "typecheck": "tsc -b",
     "build:server": "vite build --ssr server.ts --outDir dist-server",
     "start": "node --env-file-if-exists=.env dist-server/server.js"

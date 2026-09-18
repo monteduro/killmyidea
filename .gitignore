@@ -8,3 +8,5 @@ dist
 .DS_Store
 dist-server
 data/*.sqlite*
+killmyidea-evaluations*.csv
+benchmarks/results/
