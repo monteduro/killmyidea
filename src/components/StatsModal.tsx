@@ -30,7 +30,7 @@ export function StatsModal({ open, stats, onClose }: { open: boolean; stats: Sta
 
         <div className="px-5 py-5">
           <p className="font-mono text-[11px] uppercase tracking-widest opacity-60">
-            {total.toLocaleString('en-US')} ideas submitted, all time
+            {total.toLocaleString('en-US')} ideas analyzed, all time
           </p>
 
           {stats && total > 0 && (
@@ -59,7 +59,7 @@ export function StatsModal({ open, stats, onClose }: { open: boolean; stats: Sta
           )}
 
           <p className="mt-5 font-mono text-[10px] leading-relaxed opacity-50">
-            Server archive, cached for 5 minutes. Under {VERDICT_THRESHOLDS.fix} KILL · {VERDICT_THRESHOLDS.fix}–
+            Archived evaluations, cached for 5 minutes. Under {VERDICT_THRESHOLDS.fix} KILL · {VERDICT_THRESHOLDS.fix}–
             {VERDICT_THRESHOLDS.ship - 1} FIX · {VERDICT_THRESHOLDS.ship}+ SHIP.
           </p>
         </div>

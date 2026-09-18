@@ -30,7 +30,7 @@ export function Header({
         {killedCount !== null && (
           <button
             onClick={onStats}
-            title="Verdict breakdown of all submitted ideas"
+            title="Verdict breakdown of all analyzed ideas"
             className="animate-rise cursor-pointer border-2 border-ink bg-ink px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-paper transition-colors hover:bg-kill hover:text-ink"
           >
             Analyzed<span className="ml-2 opacity-70 tabular-nums">{killedCount.toLocaleString('en-US')}</span>
