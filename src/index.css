@@ -81,6 +81,15 @@ body[data-mode='dark'] {
   .legal a {
     @apply underline hover:text-kill;
   }
+  .legal table {
+    @apply w-full min-w-[40rem] border-collapse text-left text-sm leading-snug;
+  }
+  .legal th {
+    @apply border-b-2 border-ink py-2 pr-3 font-mono text-[11px] font-normal uppercase tracking-widest;
+  }
+  .legal td {
+    @apply border-b border-ink/20 py-2 pr-3 align-top;
+  }
   .legal code {
     @apply font-mono text-[0.9em] [overflow-wrap:anywhere];
   }

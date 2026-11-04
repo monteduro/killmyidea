@@ -25,7 +25,7 @@
         "shortDescription": "Judge startup ideas",
         "longDescription": "Kill My Idea tells you whether a startup or side-project idea is worth building. Describe who it is for, what it does and how it makes money or spreads, and it returns a verdict (KILL IT, FIX IT or SHIP IT), a 0-100 score, the strongest signal, the biggest risk and eight 0-100 sub-scores: real problem, clear customer, demand, money, reach, differentiation, buildability and shareability. Open-source and just-for-fun projects are scored on adoption, immediate appeal and fun instead.\n\nIt is for founders, indie hackers and product teams who want a quick, consistent first filter before spending time on an idea. The scoring rubric is fixed: the same idea gets the same scores, and the result is a set of numbers, not generated advice. Vague ideas are not scored: the result says which details are missing.\n\nA second tool reports how many ideas have been judged and how many were killed, fixed or shipped.\n\nNo account or API key needed. It is a first filter, not market research. Ideas are archived anonymously (no IP, no identity) to improve the scoring; confidential ideas can be judged with do_not_archive, which stores nothing.",
         "developerName": "Stefano Monteduro",
-        "category": "Productivity",
+        "category": "Business & Operations",
         "capabilities": [
           "Judge startup and side-project ideas",
           "Score ideas on eight dimensions",
