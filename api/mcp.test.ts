@@ -121,8 +121,16 @@ describe('MCP lifecycle', () => {
     expect(await res.json()).toEqual([{ jsonrpc: '2.0', id: 1, result: {} }])
   })
 
-  it('has no GET stream and answers CORS preflight', async () => {
-    expect(GET().status).toBe(405)
+  it('refuses a GET stream but shows setup instructions to any other GET', async () => {
+    const stream = GET(new Request('http://localhost/api/mcp', { headers: { Accept: 'text/event-stream' } }))
+    expect(stream.status).toBe(405)
+    const page = GET(new Request('http://localhost/api/mcp', { headers: { Accept: 'text/html' } }))
+    expect(page.status).toBe(200)
+    expect(page.headers.get('Content-Type')).toMatch(/^text\/plain/)
+    const text = await page.text()
+    expect(text).toContain('claude mcp add --transport http killmyidea https://killmyidea.biz/api/mcp')
+    expect(text).toContain('https://killmyidea.biz/api/mcp/server-card')
+    expect(GET().status).toBe(200)
     expect(OPTIONS().status).toBe(204)
   })
 })

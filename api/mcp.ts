@@ -1,7 +1,7 @@
 // POST /api/mcp — free, public MCP server (Streamable HTTP, stateless, no auth).
 // Every request is one JSON-RPC message answered with plain JSON: no sessions, no SSE.
 // Docs for humans and agents: /mcp/ and /mcp.md.
-import { SITE_URL } from '../src/lib/features.js'
+import { REPO_URL, SITE_URL } from '../src/lib/features.js'
 import { DECISION_COUNT, DIMENSION_HINTS, DIMENSION_LABELS, GOALS, GOAL_LABELS, type DimensionKey } from '../src/lib/questions.js'
 import { dimensionCopy, LOW_CLARITY_COPY } from '../src/lib/copy.js'
 import { IDEA_MAX, IDEA_MIN } from '../src/lib/evaluate.js'
@@ -11,19 +11,9 @@ import type { Evaluation } from '../src/lib/types.js'
 import { VERDICT_THRESHOLDS, verdictLabel } from '../src/lib/verdict.js'
 import { evaluationStats, logMcpRequest } from './_analytics-db.js'
 import { judge } from './_judge.js'
+import { PROTOCOL_VERSIONS, SERVER_INFO } from './_mcp-meta.js'
 
-/** Newest first. An unknown requested version gets the newest one. */
-export const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']
-
-const SERVER_INFO = {
-  name: 'killmyidea',
-  title: 'Kill My Idea',
-  version: '1.0.0',
-  description:
-    'Helps an agent judge a startup or side-project idea before anyone builds it: send a plain-words description and get a KILL IT, FIX IT or SHIP IT verdict, a 0-100 score, the best signal, the biggest risk and eight 0-100 sub-scores from Jev (TypeSafe AI). Also reports how many ideas have been judged and how they ended.',
-  icons: [{ src: `${SITE_URL}/favicon.svg`, mimeType: 'image/svg+xml', sizes: ['any'] }],
-  websiteUrl: `${SITE_URL}/mcp/`,
-}
+export { PROTOCOL_VERSIONS }
 
 const INSTRUCTIONS = `Kill My Idea judges startup and side-project ideas with Jev (TypeSafe AI), a classifier, not a chatbot.
 Call judge_idea with a concrete description: who it is for, what it does, how it makes money or spreads.
@@ -422,11 +412,47 @@ export async function POST(request: Request): Promise<Response> {
   return response === null ? new Response(null, { status: 202, headers: CORS }) : json(response)
 }
 
-/** No server-initiated stream: the spec says answer GET with 405. Browsers get a pointer to the docs. */
-export function GET(): Response {
-  return new Response(`Kill My Idea MCP server. POST JSON-RPC here. Setup: ${SITE_URL}/mcp/\n`, {
-    status: 405,
-    headers: { 'Content-Type': 'text/plain; charset=utf-8', Allow: 'POST, OPTIONS', ...CORS },
+/** Plain-text setup for anyone who opens the endpoint in a browser or fetches it without asking for a stream. */
+const SETUP = `Kill My Idea MCP server
+
+Judges startup and side-project ideas: KILL IT, FIX IT or SHIP IT, a 0-100 score and eight sub-scores.
+
+Endpoint:   ${SITE_URL}/api/mcp
+Transport:  Streamable HTTP, stateless: POST one JSON-RPC message, get application/json back. No SSE stream.
+Auth:       none. No API key, no account, no OAuth.
+Tools:      judge_idea(idea, goal?, do_not_archive?), get_stats()
+
+Claude Code:
+  claude mcp add --transport http killmyidea ${SITE_URL}/api/mcp
+
+Codex:
+  codex mcp add killmyidea --url ${SITE_URL}/api/mcp
+
+Cursor (~/.cursor/mcp.json):
+  { "mcpServers": { "killmyidea": { "url": "${SITE_URL}/api/mcp" } } }
+
+VS Code (.vscode/mcp.json):
+  { "servers": { "killmyidea": { "type": "http", "url": "${SITE_URL}/api/mcp" } } }
+
+Claude Desktop / claude.ai: Settings > Connectors > Add custom connector, URL above, no authentication.
+ChatGPT: Settings > Apps > Advanced > Developer mode, create an app with the URL above, no authentication.
+
+Setup for every client: ${SITE_URL}/mcp/ (humans) and ${SITE_URL}/mcp.md (agents)
+Server Card: ${SITE_URL}/api/mcp/server-card
+Source: ${REPO_URL}
+`
+
+/**
+ * A GET asking for an SSE stream gets 405, as the Streamable HTTP spec requires of a server
+ * without one. Any other GET (a browser, a crawler) gets the setup instructions.
+ */
+export function GET(request?: Request): Response {
+  const accept = request?.headers.get('accept') ?? ''
+  if (accept.includes('text/event-stream')) {
+    return new Response(null, { status: 405, headers: { Allow: 'POST, OPTIONS', ...CORS } })
+  }
+  return new Response(SETUP, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=3600', ...CORS },
   })
 }
 

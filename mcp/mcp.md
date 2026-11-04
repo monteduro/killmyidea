@@ -3,7 +3,8 @@
 > Free, public MCP server that judges startup and side-project ideas: KILL IT, FIX IT or SHIP IT, with a 0-100 score, the best signal, the biggest risk and eight 0-100 sub-scores. No API key, no account, no OAuth.
 
 - Endpoint: `__SITE_URL__/api/mcp`
-- Transport: Streamable HTTP. Stateless: every request is one JSON-RPC message answered with `application/json`. No session id, no SSE stream (GET returns 405).
+- Transport: Streamable HTTP. Stateless: every request is one JSON-RPC message answered with `application/json`. No session id, no SSE stream: a GET with `Accept: text/event-stream` returns 405, any other GET returns these setup basics as plain text.
+- Server Card: `__SITE_URL__/api/mcp/server-card` (also `__SITE_URL__/.well-known/mcp/server-card.json`, listed in `__SITE_URL__/.well-known/ai-catalog.json`)
 - Auth: none. Do not send an Authorization header or configure OAuth.
 - Server name: `killmyidea`
 - Human docs: __SITE_URL__/mcp/

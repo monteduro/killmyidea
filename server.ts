@@ -4,6 +4,7 @@ import { createServer } from 'node:http'
 import { forwardedHeaders } from './api/_headers.js'
 import * as evaluate from './api/evaluate.js'
 import * as mcp from './api/mcp.js'
+import * as serverCard from './api/mcp-server-card.js'
 import * as stats from './api/stats.js'
 import * as usage from './api/usage.js'
 
@@ -15,6 +16,7 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
   '/api/stats': { GET: stats.GET },
   '/api/usage': { GET: usage.GET },
   '/api/mcp': { POST: mcp.POST, GET: mcp.GET, OPTIONS: mcp.OPTIONS },
+  '/api/mcp/server-card': { GET: serverCard.GET, OPTIONS: serverCard.OPTIONS },
 }
 
 const send = async (res: import('node:http').ServerResponse, response: Response) => {

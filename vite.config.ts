@@ -6,6 +6,7 @@ import type { IncomingMessage } from 'node:http'
 import { resolve } from 'node:path'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { forwardedHeaders } from './api/_headers'
+import { aiCatalog, serverCard } from './api/_mcp-meta'
 
 // Serves api/*.ts during `npm run dev`, mirroring the production server (server.ts).
 const API_ROUTES: Record<string, { module: string; methods: string[] }> = {
@@ -13,6 +14,7 @@ const API_ROUTES: Record<string, { module: string; methods: string[] }> = {
   '/api/stats': { module: '/api/stats.ts', methods: ['GET'] },
   '/api/usage': { module: '/api/usage.ts', methods: ['GET'] },
   '/api/mcp': { module: '/api/mcp.ts', methods: ['POST', 'GET', 'OPTIONS'] },
+  '/api/mcp/server-card': { module: '/api/mcp-server-card.ts', methods: ['GET', 'OPTIONS'] },
 }
 
 function localApi(): Plugin {
@@ -49,7 +51,8 @@ function localApi(): Plugin {
 }
 
 // Absolute URLs for canonical/OG tags, robots.txt, sitemap.xml and the agent docs
-// (/mcp.md from mcp/mcp.md, /llms.txt). Set SITE_URL for previews; defaults to production.
+// (/mcp.md from mcp/mcp.md, /llms.txt) and the MCP discovery files under /.well-known/.
+// Set SITE_URL for previews; defaults to production.
 function siteUrl(): Plugin {
   const base = () => (process.env.SITE_URL || 'https://killmyidea.biz').replace(/\/$/, '')
   const withBase = (text: string) => text.replaceAll('__SITE_URL__', base())
@@ -70,6 +73,9 @@ function siteUrl(): Plugin {
 - Endpoint: ${base()}/api/mcp (Streamable HTTP, stateless, no auth)
 - Tools: judge_idea(idea, goal?, do_not_archive?), get_stats()
 `,
+    // Domain-level discovery. The canonical card is served by the API at /api/mcp/server-card.
+    '.well-known/ai-catalog.json': `${JSON.stringify(aiCatalog(base()), null, 2)}\n`,
+    '.well-known/mcp/server-card.json': `${JSON.stringify(serverCard(base()), null, 2)}\n`,
   })
   return {
     name: 'site-url',
@@ -78,7 +84,9 @@ function siteUrl(): Plugin {
       server.middlewares.use((req, res, next) => {
         const doc = agentDocs()[req.url?.split('?')[0].slice(1) ?? '']
         if (doc === undefined) return next()
-        res.setHeader('Content-Type', `${req.url?.endsWith('.md') ? 'text/markdown' : 'text/plain'}; charset=utf-8`)
+        const path = req.url?.split('?')[0] ?? ''
+        const type = path.endsWith('.md') ? 'text/markdown' : path.endsWith('.json') ? 'application/json' : 'text/plain'
+        res.setHeader('Content-Type', `${type}; charset=utf-8`)
         res.end(doc)
       })
     },
