@@ -124,10 +124,20 @@ describe('MCP lifecycle', () => {
   it('refuses a GET stream but shows setup instructions to any other GET', async () => {
     const stream = GET(new Request('http://localhost/api/mcp', { headers: { Accept: 'text/event-stream' } }))
     expect(stream.status).toBe(405)
-    const page = GET(new Request('http://localhost/api/mcp', { headers: { Accept: 'text/html' } }))
+    // What a browser sends.
+    const page = GET(new Request('http://localhost/api/mcp', { headers: { Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' } }))
     expect(page.status).toBe(200)
-    expect(page.headers.get('Content-Type')).toMatch(/^text\/plain/)
-    const text = await page.text()
+    expect(page.headers.get('Content-Type')).toBe('text/html; charset=utf-8')
+    expect(page.headers.get('Vary')).toBe('Accept')
+    const html = await page.text()
+    expect(html).toMatch(/^<!doctype html>/)
+    expect(html).toContain('<title>Kill My Idea MCP server</title>')
+    expect(html).toContain('claude mcp add --transport http killmyidea https://killmyidea.biz/api/mcp')
+    expect(html).toContain('{ &quot;mcpServers&quot;')
+
+    const plain = GET(new Request('http://localhost/api/mcp', { headers: { Accept: '*/*' } }))
+    expect(plain.headers.get('Content-Type')).toBe('text/plain; charset=utf-8')
+    const text = await plain.text()
     expect(text).toContain('claude mcp add --transport http killmyidea https://killmyidea.biz/api/mcp')
     expect(text).toContain('https://killmyidea.biz/api/mcp/server-card')
     expect(GET().status).toBe(200)
