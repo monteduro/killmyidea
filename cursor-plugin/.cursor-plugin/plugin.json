@@ -1,0 +1,14 @@
+{
+  "name": "killmyidea",
+  "displayName": "Kill My Idea",
+  "version": "1.0.0",
+  "description": "Judges startup and side-project ideas: KILL IT, FIX IT or SHIP IT, a 0-100 score and 8 sub-scores.",
+  "author": { "name": "Stefano Monteduro" },
+  "homepage": "https://killmyidea.biz/mcp/",
+  "repository": "https://github.com/monteduro/killmyidea",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": ["startup", "idea validation", "side project", "product", "mcp"],
+  "tags": ["startup", "ideas", "mcp"],
+  "mcpServers": "./mcp.json"
+}

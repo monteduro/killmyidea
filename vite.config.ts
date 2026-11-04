@@ -67,6 +67,7 @@ function siteUrl(): Plugin {
 - [MCP server setup and tools](${base()}/mcp.md): endpoint, per-client config, tool schemas, output format
 - [MCP server (HTML)](${base()}/mcp/): the same, for humans
 - [Source code](https://github.com/monteduro/killmyidea)
+- [Privacy policy](${base()}/privacy/) and [terms of service](${base()}/terms/)
 
 ## MCP
 
@@ -102,6 +103,8 @@ function siteUrl(): Plugin {
   <url><loc>${base()}/</loc></url>
   <url><loc>${base()}/mcp/</loc></url>
   <url><loc>${base()}/stats/</loc></url>
+  <url><loc>${base()}/privacy/</loc></url>
+  <url><loc>${base()}/terms/</loc></url>
 </urlset>
 `,
       })
@@ -146,8 +149,8 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss(), localApi(), siteUrl(), datafast(mode)],
     server: { host: '127.0.0.1', port: 5317, strictPort: true },
-    // Static docs page for the MCP server, next to the SPA.
-    build: { rollupOptions: { input: { main: resolve(import.meta.dirname, 'index.html'), mcp: resolve(import.meta.dirname, 'mcp/index.html'), stats: resolve(import.meta.dirname, 'stats/index.html') } } },
+    // Static pages next to the SPA: MCP docs, usage numbers, privacy and terms.
+    build: { rollupOptions: { input: { main: resolve(import.meta.dirname, 'index.html'), mcp: resolve(import.meta.dirname, 'mcp/index.html'), stats: resolve(import.meta.dirname, 'stats/index.html'), privacy: resolve(import.meta.dirname, 'privacy/index.html'), terms: resolve(import.meta.dirname, 'terms/index.html') } } },
     test: { environment: 'node' },
   }
 })

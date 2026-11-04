@@ -219,3 +219,5 @@ curl https://api.anthropic.com/v1/messages \
 ## Privacy and fair use
 
 Ideas are archived anonymously for product analytics (no IP address, no identifiers) unless `do_not_archive` is `true`. Calls are counted (method, tool name, client name, user agent), never their arguments. The server is free; please don't loop it or load-test it.
+
+Privacy policy: __SITE_URL__/privacy/. Terms of service: __SITE_URL__/terms/. Contact: hello@killmyidea.biz.

@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Privacy policy · Kill My Idea</title>
+    <meta name="description" content="What Kill My Idea collects when you judge an idea on the website or through the MCP server, why, who receives it and what you can do about it. No accounts, no cookies." />
+    <meta name="theme-color" content="#f1efe8" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kill My Idea" />
+    <meta property="og:title" content="Kill My Idea privacy policy" />
+    <meta property="og:description" content="What Kill My Idea collects, why, and what you can do about it. No accounts, no cookies." />
+    <meta property="og:url" content="__SITE_URL__/privacy/" />
+    <meta property="og:image" content="__SITE_URL__/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="__SITE_URL__/privacy/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!--DATAFAST-->
+  </head>
+  <body>
+    <div class="flex min-h-dvh flex-col">
+      <!-- Static fallback for crawlers and no-JS; src/legal-page.tsx replaces it with the app header. -->
+      <div id="site-header">
+        <header class="flex flex-wrap items-start justify-between gap-4 px-5 pt-5 sm:px-8 sm:pt-7">
+          <a href="/" aria-label="Kill My Idea home" class="block text-xl font-black uppercase leading-[0.82] tracking-[-0.04em]">
+            <span class="block">Kill</span>
+            <span class="block">My</span>
+            <span class="block">Idea</span>
+          </a>
+          <nav class="ml-auto flex items-stretch gap-1 sm:gap-2">
+            <a href="/" class="border-2 border-ink bg-ink px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-paper transition-colors hover:bg-kill hover:text-ink">Try it</a>
+          </nav>
+        </header>
+      </div>
+
+      <main class="legal mx-auto w-full max-w-3xl flex-1 px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
+        <p class="font-mono text-[11px] uppercase tracking-widest opacity-60">Last updated: November 4, 2026</p>
+        <h1 class="mt-3 text-[clamp(3rem,11vw,6.5rem)] font-black uppercase leading-[0.85] tracking-[-0.05em]">Privacy</h1>
+        <p class="mt-6 text-xl font-medium leading-snug sm:text-2xl">
+          What Kill My Idea collects, why, and what you can do about it. Plain English, no accounts, no cookies.
+        </p>
+
+        <section aria-labelledby="short">
+          <h2 id="short">The short version</h2>
+          <ul>
+            <li>There are no accounts and no sign-in. We don't set cookies.</li>
+            <li>The idea you submit is sent to TypeSafe AI to be scored.</li>
+            <li>Unless you opt out, the idea and its scores are archived on our server, without your IP address or any identifier.</li>
+            <li>Your private history stays in your browser. We never receive it.</li>
+            <li>Analytics are cookieless and never see the text of your idea.</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="who">
+          <h2 id="who">Who we are</h2>
+          <p>
+            Kill My Idea (killmyidea.biz), including its MCP server at <code>__SITE_URL__/api/mcp</code>, is run by Stefano
+            Monteduro, an individual based in Italy, who is the data controller for the personal data described on this page.
+            For anything privacy related, write to <a href="mailto:hello@killmyidea.biz">hello@killmyidea.biz</a>.
+          </p>
+        </section>
+
+        <section aria-labelledby="collect">
+          <h2 id="collect">What we collect and why</h2>
+
+          <h3>1. The ideas you submit</h3>
+          <p>
+            When you judge an idea, on the website or through the MCP server, its text and the goal you picked (making money,
+            open source or just for fun) are sent to TypeSafe AI, whose Jev classifier answers the questions it is scored on.
+            Nothing else about you is sent with it.
+          </p>
+          <p>
+            Unless you opt out, we archive the idea text with its result: the score, the verdict, the eight sub-scores, the
+            category, the goal, where it came from (website or MCP), when it was judged and technical details of the scoring
+            (model, token counts, response time and the classifier's raw answer). We don't store your IP address, an account,
+            a device identifier or anything else that points to you.
+          </p>
+          <p>
+            <strong>To opt out:</strong> on the website, tick <em>Don't archive this evaluation for product analysis</em>.
+            Through the MCP server, set <code>do_not_archive</code> to <code>true</code>, or ask your assistant to keep the idea
+            confidential. The idea is then scored and not stored.
+          </p>
+          <ul>
+            <li><strong>Why:</strong> to measure and improve the scoring, and to publish aggregate numbers on <a href="/stats/">/stats/</a>.</li>
+            <li><strong>Legal basis:</strong> our legitimate interest in running and improving Kill My Idea (Art. 6(1)(f) GDPR), with the opt-out above.</li>
+            <li><strong>How long:</strong> archived ideas are kept while Kill My Idea runs, because they show how the scoring changes over time. You can ask us to delete one at any time (see <a href="#rights">your rights</a>).</li>
+          </ul>
+          <p>
+            We don't publish the text of archived ideas: only aggregate counts appear on the site and in the MCP server's
+            <code>get_stats</code> tool. Please don't put personal data, such as names or email addresses, or anything you are
+            not allowed to share in an idea. If an idea is confidential, opt out of the archive.
+          </p>
+
+          <h3>2. MCP server requests</h3>
+          <p>
+            For each request to the MCP server we log the time, the method, the tool name, the client name and version as your
+            client reports them, its user agent, the protocol version, whether the request succeeded and how long it took. We
+            don't log your IP address or the tool arguments, so these logs never contain the idea.
+          </p>
+          <ul>
+            <li><strong>Why:</strong> to know which clients use the server, to spot errors, and for the usage numbers on /stats/, where only known client names are shown.</li>
+            <li><strong>Legal basis:</strong> our legitimate interest in running a reliable service (Art. 6(1)(f) GDPR).</li>
+            <li><strong>How long:</strong> while Kill My Idea runs.</li>
+          </ul>
+          <p>
+            If you use Kill My Idea through an AI assistant such as Claude, ChatGPT or Cursor, your conversation is handled by
+            that assistant's provider under its own privacy policy. We only receive what the assistant sends to the tool.
+          </p>
+
+          <h3>3. Your private history (in your browser only)</h3>
+          <p>
+            If you tick <em>Save my idea to my private history</em>, the idea and its result are saved in your browser's local
+            storage, up to the last 100 ideas. They are never sent to us. Delete one idea or the whole history from the history
+            drawer, or by clearing your browser's site data.
+          </p>
+
+          <h3>4. Analytics</h3>
+          <p>
+            We use DataFast in cookieless mode to see how the site is used: pages visited, where visitors come from, device and
+            browser type and approximate country. When you submit an idea it records one event with the idea's length, the goal
+            and whether you chose to save or archive it, never the text. Visitors are counted with a pseudonymous identifier
+            made from the IP address, browser user agent, our domain and a salt that changes every 24 hours, so visits on
+            different days aren't linked to one profile.
+          </p>
+          <ul>
+            <li><strong>Legal basis:</strong> our legitimate interest in understanding and improving the site (Art. 6(1)(f) GDPR).</li>
+          </ul>
+
+          <h3>5. Hosting and security</h3>
+          <p>
+            The site sits behind Cloudflare and runs on a server we manage. Both process technical data such as your IP address
+            and request details to deliver the pages and the API and to protect them from abuse. Server logs are rotated
+            regularly and are not used to profile visitors.
+          </p>
+          <ul>
+            <li><strong>Legal basis:</strong> our legitimate interest in a working, secure service (Art. 6(1)(f) GDPR).</li>
+          </ul>
+
+          <h3>6. Email</h3>
+          <p>
+            If you write to us, we use your email address and message only to reply, and delete them when the conversation is
+            over unless we need to keep them to handle a legal request.
+          </p>
+        </section>
+
+        <section aria-labelledby="cookies">
+          <h2 id="cookies">Cookies and browser storage</h2>
+          <p>
+            We don't set cookies. We use your browser's local storage only for your private history, if you turn it on, and for
+            a one-time marker used when your history moved from the old address killmyidea.stemonte.io. Session storage is used
+            only during that move. DataFast may use session storage for the current tab, which is cleared when you close it.
+          </p>
+        </section>
+
+        <section aria-labelledby="share">
+          <h2 id="share">Who we share data with</h2>
+          <p>We never sell your data. We use these providers to run Kill My Idea:</p>
+          <ul>
+            <li><strong>TypeSafe AI</strong> (<a href="https://typesafe.ai" target="_blank" rel="noopener noreferrer">typesafe.ai</a>): scores the idea text with its Jev classifier.</li>
+            <li><strong>Cloudflare, Inc.</strong> (USA): DNS, delivery and protection of the site, and forwarding of email sent to hello@killmyidea.biz.</li>
+            <li><strong>JustShipIt Pte. Ltd., trading as DataFast</strong> (Singapore, with infrastructure that includes the USA): analytics.</li>
+            <li><strong>Our server hosting provider</strong>: runs the site, the API and the archive.</li>
+          </ul>
+          <p>
+            If you share a result on X, the post is yours and is covered by X's privacy policy. The share image is created in
+            your browser.
+          </p>
+        </section>
+
+        <section aria-labelledby="transfers">
+          <h2 id="transfers">Transfers outside the EU</h2>
+          <p>
+            Some providers process data outside the European Economic Area, for example in the USA or Singapore. These transfers
+            rely on the safeguards in the providers' data processing terms, such as the EU–US Data Privacy Framework or the
+            European Commission's Standard Contractual Clauses.
+          </p>
+        </section>
+
+        <section aria-labelledby="rights">
+          <h2 id="rights">Your rights</h2>
+          <p>
+            Under the GDPR you can ask to access, correct or delete your data, restrict or object to how we use it, and get a
+            copy in a portable format. Write to <a href="mailto:hello@killmyidea.biz">hello@killmyidea.biz</a> and we'll reply
+            within one month.
+          </p>
+          <p>
+            Archived ideas carry no identifier, so we can't tell which ones are yours. To have an idea deleted, send us its text,
+            or a distinctive part of it, and roughly when you submitted it.
+          </p>
+          <p>
+            You can also lodge a complaint with a data protection authority: in Italy, the Garante per la protezione dei dati
+            personali, or the authority where you live.
+          </p>
+        </section>
+
+        <section aria-labelledby="kids">
+          <h2 id="kids">Kids</h2>
+          <p>Kill My Idea is not meant for anyone under 16, and we don't knowingly collect their data.</p>
+        </section>
+
+        <section aria-labelledby="changes">
+          <h2 id="changes">Changes</h2>
+          <p>
+            If this policy changes, we'll update this page and the date at the top. See also the
+            <a href="/terms/">terms of service</a>.
+          </p>
+        </section>
+      </main>
+
+      <footer class="mt-auto flex flex-wrap justify-between gap-x-6 gap-y-1 px-5 pb-6 pt-10 font-mono text-[10px] uppercase tracking-widest opacity-50 sm:px-8">
+        <span>Decisions by Jev / <a href="https://typesafe.ai" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-100">TypeSafe AI</a></span>
+        <span>
+          <a href="/mcp/" class="underline">Free MCP server</a>
+          · <a href="/stats/" class="underline">Stats</a>
+          · <a href="/privacy/" class="underline">Privacy</a>
+          · <a href="/terms/" class="underline">Terms</a>
+          · <a href="https://github.com/monteduro/killmyidea" target="_blank" rel="noopener noreferrer" class="underline">Source on GitHub</a>
+          · Built by <a href="https://x.com/stemonte" target="_blank" rel="noopener noreferrer" class="underline">stemonte</a>
+        </span>
+      </footer>
+    </div>
+    <script type="module" src="/src/legal-page.tsx"></script>
+  </body>
+</html>

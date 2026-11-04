@@ -58,3 +58,30 @@ body[data-mode='dark'] {
     transition: none !important;
   }
 }
+
+/* Long-form text on /privacy/ and /terms/: the HTML stays plain, the look matches /mcp/.
+   In the components layer so utilities on a single element still win. */
+@layer components {
+  .legal section {
+    @apply mt-14 border-t-2 border-ink pt-8;
+  }
+  .legal h2 {
+    @apply text-3xl font-black uppercase tracking-tight sm:text-4xl;
+  }
+  .legal h3 {
+    @apply mt-8 text-xl font-bold;
+  }
+  .legal p,
+  .legal ul {
+    @apply mt-3 text-lg leading-snug;
+  }
+  .legal ul {
+    @apply list-disc space-y-2 pl-5;
+  }
+  .legal a {
+    @apply underline hover:text-kill;
+  }
+  .legal code {
+    @apply font-mono text-[0.9em] [overflow-wrap:anywhere];
+  }
+}

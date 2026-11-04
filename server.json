@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "biz.killmyidea/killmyidea",
+  "title": "Kill My Idea",
+  "description": "Judges startup and side-project ideas: KILL IT, FIX IT or SHIP IT, a 0-100 score and 8 sub-scores.",
+  "version": "1.0.0",
+  "websiteUrl": "https://killmyidea.biz/mcp/",
+  "repository": {
+    "url": "https://github.com/monteduro/killmyidea",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://killmyidea.biz/favicon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": ["any"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://killmyidea.biz/api/mcp"
+    }
+  ]
+}

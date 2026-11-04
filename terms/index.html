@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Terms of service · Kill My Idea</title>
+    <meta name="description" content="The terms for using Kill My Idea, the website and the free MCP server: what a verdict is, your ideas, fair use and the limits of the service." />
+    <meta name="theme-color" content="#f1efe8" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kill My Idea" />
+    <meta property="og:title" content="Kill My Idea terms of service" />
+    <meta property="og:description" content="What a verdict is, your ideas, fair use and the limits of the service." />
+    <meta property="og:url" content="__SITE_URL__/terms/" />
+    <meta property="og:image" content="__SITE_URL__/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="__SITE_URL__/terms/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!--DATAFAST-->
+  </head>
+  <body>
+    <div class="flex min-h-dvh flex-col">
+      <!-- Static fallback for crawlers and no-JS; src/legal-page.tsx replaces it with the app header. -->
+      <div id="site-header">
+        <header class="flex flex-wrap items-start justify-between gap-4 px-5 pt-5 sm:px-8 sm:pt-7">
+          <a href="/" aria-label="Kill My Idea home" class="block text-xl font-black uppercase leading-[0.82] tracking-[-0.04em]">
+            <span class="block">Kill</span>
+            <span class="block">My</span>
+            <span class="block">Idea</span>
+          </a>
+          <nav class="ml-auto flex items-stretch gap-1 sm:gap-2">
+            <a href="/" class="border-2 border-ink bg-ink px-3 py-1.5 font-mono text-xs uppercase tracking-widest text-paper transition-colors hover:bg-kill hover:text-ink">Try it</a>
+          </nav>
+        </header>
+      </div>
+
+      <main class="legal mx-auto w-full max-w-3xl flex-1 px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
+        <p class="font-mono text-[11px] uppercase tracking-widest opacity-60">Last updated: November 4, 2026</p>
+        <h1 class="mt-3 text-[clamp(3rem,11vw,6.5rem)] font-black uppercase leading-[0.85] tracking-[-0.05em]">Terms</h1>
+        <p class="mt-6 text-xl font-medium leading-snug sm:text-2xl">
+          The rules for using Kill My Idea. It is free and has no accounts, so they are short.
+        </p>
+
+        <section aria-labelledby="service">
+          <h2 id="service">The service</h2>
+          <p>
+            Kill My Idea (killmyidea.biz) judges startup and side-project ideas, on the website and through a public MCP server
+            at <code>__SITE_URL__/api/mcp</code> that AI assistants and agents can call. It is run by Stefano Monteduro, an
+            individual based in Italy. It is free and needs no account or API key.
+          </p>
+          <p>
+            By using it you accept these terms. How we handle data is explained in the <a href="/privacy/">privacy policy</a>.
+          </p>
+        </section>
+
+        <section aria-labelledby="verdict">
+          <h2 id="verdict">What a verdict is</h2>
+          <p>
+            A verdict (KILL IT, FIX IT or SHIP IT), its score and its sub-scores are produced automatically: Jev, a classifier
+            from TypeSafe AI, answers a fixed set of questions about the text you give it, and a fixed rubric turns the answers
+            into numbers. Nobody reviews your idea.
+          </p>
+          <p>
+            A verdict is a quick, consistent first filter. It is not business, financial, legal or investment advice, and it is
+            not market research. It can be wrong, and it only knows what you wrote. What you build, and whether you build it, is
+            your decision.
+          </p>
+        </section>
+
+        <section aria-labelledby="ideas">
+          <h2 id="ideas">Your ideas</h2>
+          <ul>
+            <li>Your ideas stay yours. We don't claim any rights to them beyond what is needed to run the service.</li>
+            <li>Only submit text you have the right to share. Don't include other people's personal data or information you are bound to keep confidential.</li>
+            <li>By submitting an idea you let us send it to TypeSafe AI to be scored and, unless you opt out, archive it and use it to measure and improve Kill My Idea, as the <a href="/privacy/">privacy policy</a> describes. We don't publish the text of archived ideas.</li>
+            <li>For a confidential idea, opt out of the archive: tick <em>Don't archive this evaluation for product analysis</em> on the website, or set <code>do_not_archive</code> through the MCP server.</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="use">
+          <h2 id="use">Fair use</h2>
+          <p>
+            You can use Kill My Idea, and its MCP server, in your own assistants, agents, apps and workflows, including
+            commercial ones. In return:
+          </p>
+          <ul>
+            <li>Don't submit unlawful, hateful or harassing content, or content meant to harm someone.</li>
+            <li>Don't overload the service: no high-volume automated calls, load tests or loops. It is a free side project.</li>
+            <li>Don't try to break, bypass or probe it beyond normal use, or to reach data that isn't public.</li>
+            <li>Don't present its verdicts as reviewed by a person, or as advice they are not.</li>
+          </ul>
+          <p>We may limit or block access that breaks these rules, without notice.</p>
+        </section>
+
+        <section aria-labelledby="availability">
+          <h2 id="availability">Availability and changes</h2>
+          <p>
+            Kill My Idea is offered as is, with no uptime guarantee. We may change the scoring, the tools or the results, limit
+            usage, or stop the service at any time. The source code is public on GitHub under the MIT License; these terms
+            cover the hosted service at killmyidea.biz.
+          </p>
+        </section>
+
+        <section aria-labelledby="liability">
+          <h2 id="liability">Liability</h2>
+          <p>
+            As far as the law allows, Kill My Idea comes without warranties of any kind, and we are not liable for decisions
+            you make based on a verdict or for indirect losses such as lost profits or lost opportunities. Nothing in these
+            terms limits liability that cannot be limited by law, including for wilful misconduct or gross negligence, or the
+            rights you have as a consumer.
+          </p>
+        </section>
+
+        <section aria-labelledby="others">
+          <h2 id="others">Other services</h2>
+          <p>
+            TypeSafe AI provides the classifier. If you use Kill My Idea through an AI assistant or an MCP client, that product's
+            own terms apply to it. If you share a result on X, X's terms apply to the post.
+          </p>
+        </section>
+
+        <section aria-labelledby="law">
+          <h2 id="law">Changes to these terms and applicable law</h2>
+          <p>
+            If these terms change, we'll update this page and the date at the top; using the service after that means you
+            accept the new version. These terms are governed by Italian law. If you are a consumer, you keep the protection of
+            the mandatory rules of the country where you live, and you can bring a claim in its courts.
+          </p>
+        </section>
+
+        <section aria-labelledby="contact">
+          <h2 id="contact">Contact</h2>
+          <p>Questions, problems or requests: <a href="mailto:hello@killmyidea.biz">hello@killmyidea.biz</a>.</p>
+        </section>
+      </main>
+
+      <footer class="mt-auto flex flex-wrap justify-between gap-x-6 gap-y-1 px-5 pb-6 pt-10 font-mono text-[10px] uppercase tracking-widest opacity-50 sm:px-8">
+        <span>Decisions by Jev / <a href="https://typesafe.ai" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-100">TypeSafe AI</a></span>
+        <span>
+          <a href="/mcp/" class="underline">Free MCP server</a>
+          · <a href="/stats/" class="underline">Stats</a>
+          · <a href="/privacy/" class="underline">Privacy</a>
+          · <a href="/terms/" class="underline">Terms</a>
+          · <a href="https://github.com/monteduro/killmyidea" target="_blank" rel="noopener noreferrer" class="underline">Source on GitHub</a>
+          · Built by <a href="https://x.com/stemonte" target="_blank" rel="noopener noreferrer" class="underline">stemonte</a>
+        </span>
+      </footer>
+    </div>
+    <script type="module" src="/src/legal-page.tsx"></script>
+  </body>
+</html>

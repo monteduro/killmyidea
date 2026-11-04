@@ -11,8 +11,8 @@ export const SERVER_VERSION = '1.0.0'
 const description =
   'Helps an agent judge a startup or side-project idea before anyone builds it: send a plain-words description and get a KILL IT, FIX IT or SHIP IT verdict, a 0-100 score, the best signal, the biggest risk and eight 0-100 sub-scores from Jev (TypeSafe AI). Also reports how many ideas have been judged and how they ended.'
 
-/** The Server Card caps description at 100 characters. */
-const shortDescription = 'Judges startup and side-project ideas: KILL IT, FIX IT or SHIP IT, a 0-100 score and 8 sub-scores.'
+/** Server Card, MCP Registry (server.json) and Cursor plugin: all cap description at 100 characters. */
+export const SHORT_DESCRIPTION = 'Judges startup and side-project ideas: KILL IT, FIX IT or SHIP IT, a 0-100 score and 8 sub-scores.'
 
 const icons = (base: string) => [{ src: `${base}/favicon.svg`, mimeType: 'image/svg+xml', sizes: ['any'] }]
 
@@ -35,7 +35,7 @@ export function serverCard(base = SITE_URL) {
     name: `${new URL(base).hostname.split('.').reverse().join('.')}/killmyidea`,
     version: SERVER_VERSION,
     title: SERVER_INFO.title,
-    description: shortDescription,
+    description: SHORT_DESCRIPTION,
     websiteUrl: `${base}/mcp/`,
     repository: { url: REPO_URL, source: 'github' },
     icons: icons(base),

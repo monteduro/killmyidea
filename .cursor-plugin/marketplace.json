@@ -1,0 +1,12 @@
+{
+  "name": "killmyidea",
+  "owner": { "name": "Stefano Monteduro" },
+  "metadata": { "description": "Kill My Idea for Cursor." },
+  "plugins": [
+    {
+      "name": "killmyidea",
+      "source": "./cursor-plugin",
+      "description": "Judges startup and side-project ideas: KILL IT, FIX IT or SHIP IT, a 0-100 score and 8 sub-scores."
+    }
+  ]
+}

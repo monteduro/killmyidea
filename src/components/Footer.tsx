@@ -18,11 +18,19 @@ export function Footer() {
           Stats
         </a>
         {' · '}
+        <a href="/privacy/" className="underline">
+          Privacy
+        </a>
+        {' · '}
+        <a href="/terms/" className="underline">
+          Terms
+        </a>
+        {' · '}
         <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="underline">
           Source on GitHub
         </a>
         {' · '}Built by{' '}
-        <a href="https://x.com/stemonteduro" target="_blank" rel="noopener noreferrer" className="underline">
+        <a href="https://x.com/stemonte" target="_blank" rel="noopener noreferrer" className="underline">
           stemonte
         </a>
       </span>

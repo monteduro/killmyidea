@@ -232,7 +232,14 @@ In Claude Code, run `/mcp` and sign in with OAuth to query these analytics.
 
 ## Privacy
 
+The public policy is `privacy/index.html` (`/privacy/`), with the terms in `terms/index.html` (`/terms/`).
+Keep them in step with what the code stores. Contact: `hello@killmyidea.biz` (Cloudflare Email Routing).
+
 - Private history is off by default and stays in the browser's `localStorage`. There are no accounts.
 - Successful evaluations are archived server-side for product analysis by default; the form provides an explicit opt-out.
 - DataFast never receives idea text. To move private history to Supabase, implement
   `IdeaStore` in `src/lib/storage.ts`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
