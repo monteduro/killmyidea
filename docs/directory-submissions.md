@@ -124,7 +124,9 @@ Submit at https://claude.ai/directory/manage → Submit new → MCP connector (p
 
 ## ChatGPT (plugins)
 
-Upload at https://platform.openai.com/plugins. Requires individual or business verification, and
+Upload a plugin ZIP at https://platform.openai.com/plugins. The package is `chatgpt-plugin/`
+(Agent Plugins format: `plugin.json` with listing, test cases and review fields, `mcp.json`, logo);
+see its README for the ZIP command. Requires individual or business verification, and
 the domain proof file at `https://killmyidea.biz/.well-known/openai-apps-challenge` (token given
 during submission).
 

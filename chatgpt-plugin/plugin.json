@@ -1,0 +1,104 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "killmyidea",
+  "version": "1.0.0",
+  "description": "Judges startup and side-project ideas: KILL IT, FIX IT or SHIP IT, a 0-100 score and 8 sub-scores.",
+  "author": {
+    "name": "Stefano Monteduro",
+    "email": "hello@killmyidea.biz",
+    "url": "https://killmyidea.biz"
+  },
+  "homepage": "https://killmyidea.biz/mcp/",
+  "repository": "https://github.com/monteduro/killmyidea",
+  "license": "MIT",
+  "keywords": [
+    "startup",
+    "idea validation",
+    "side project",
+    "product",
+    "feedback"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Kill My Idea",
+        "shortDescription": "Judge startup ideas",
+        "longDescription": "Kill My Idea tells you whether a startup or side-project idea is worth building. Describe who it is for, what it does and how it makes money or spreads, and it returns a verdict (KILL IT, FIX IT or SHIP IT), a 0-100 score, the strongest signal, the biggest risk and eight 0-100 sub-scores: real problem, clear customer, demand, money, reach, differentiation, buildability and shareability. Open-source and just-for-fun projects are scored on adoption, immediate appeal and fun instead.\n\nIt is for founders, indie hackers and product teams who want a quick, consistent first filter before spending time on an idea. The scoring rubric is fixed: the same idea gets the same scores, and the result is a set of numbers, not generated advice. Vague ideas are not scored: the result says which details are missing.\n\nA second tool reports how many ideas have been judged and how many were killed, fixed or shipped.\n\nNo account or API key needed. It is a first filter, not market research. Ideas are archived anonymously (no IP, no identity) to improve the scoring; confidential ideas can be judged with do_not_archive, which stores nothing.",
+        "developerName": "Stefano Monteduro",
+        "category": "Productivity",
+        "capabilities": [
+          "Judge startup and side-project ideas",
+          "Score ideas on eight dimensions",
+          "Report verdict statistics"
+        ],
+        "websiteURL": "https://killmyidea.biz/mcp/",
+        "supportURL": "https://killmyidea.biz/terms/#contact",
+        "privacyPolicyURL": "https://killmyidea.biz/privacy/",
+        "termsOfServiceURL": "https://killmyidea.biz/terms/",
+        "defaultPrompt": [
+          "Kill my idea: a Slack bot that turns standups into a weekly changelog for clients.",
+          "Judge this open source idea: a CLI that lints Dockerfiles for security issues.",
+          "How many ideas has Kill My Idea judged so far?"
+        ],
+        "brandColor": "#FF3B1F",
+        "composerIcon": "./assets/logo.svg",
+        "logo": "./assets/logo.svg"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Judge a SaaS idea",
+              "prompt": "Kill my idea: a Slack bot that turns daily standups into a weekly changelog that agencies send to their clients.",
+              "tools_triggered": "judge_idea",
+              "expected_behavior": "Returns a verdict (KILL IT, FIX IT or SHIP IT), a 0-100 score, the best signal, the biggest risk and eight sub-scores for the goal Make money."
+            },
+            {
+              "description": "Judge an open source project",
+              "prompt": "Judge this as an open source project: a CLI that lints Dockerfiles for security issues.",
+              "tools_triggered": "judge_idea",
+              "expected_behavior": "Calls judge_idea with goal open_source; the sub-scores include Adoption instead of Money."
+            },
+            {
+              "description": "Judge a just-for-fun project",
+              "prompt": "Is this worth building just for fun? A browser game where you guess the year of old newspaper front pages.",
+              "tools_triggered": "judge_idea",
+              "expected_behavior": "Calls judge_idea with goal fun; the sub-scores include Immediate appeal and Fun."
+            },
+            {
+              "description": "Judge a confidential idea",
+              "prompt": "Judge this, but don't store it, it's confidential: an invoicing tool for freelance translators.",
+              "tools_triggered": "judge_idea",
+              "expected_behavior": "Calls judge_idea with do_not_archive true and returns a verdict; the idea is not stored."
+            },
+            {
+              "description": "Show verdict statistics",
+              "prompt": "How many ideas has Kill My Idea judged, and how many were shipped?",
+              "tools_triggered": "get_stats",
+              "expected_behavior": "Returns the total number of ideas analyzed and the count for each verdict."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Asks for a business plan, not a verdict",
+              "prompt": "Write a business plan for my bakery."
+            },
+            {
+              "description": "Unrelated question",
+              "prompt": "What is the capital of Portugal?"
+            },
+            {
+              "description": "Idea too vague to judge",
+              "prompt": "Judge this idea: an app that helps people with things."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "Kill My Idea does not sell products or process payments."
+      },
+      "publication": {
+        "release_notes": "Initial release: judge_idea and get_stats."
+      }
+    }
+  }
+}

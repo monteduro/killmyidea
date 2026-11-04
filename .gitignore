@@ -10,3 +10,4 @@ dist-server
 data/*.sqlite*
 killmyidea-evaluations*.csv
 benchmarks/results/
+killmyidea-chatgpt-plugin*.zip

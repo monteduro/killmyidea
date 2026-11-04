@@ -52,3 +52,44 @@ describe('Cursor plugin', () => {
     expect(readFileSync(resolve(import.meta.dirname, '../cursor-plugin', plugin.logo), 'utf8')).toMatch(/^<svg/)
   })
 })
+
+describe('ChatGPT plugin', () => {
+  const plugin = read('chatgpt-plugin/plugin.json')
+  const mcp = read('chatgpt-plugin/mcp.json')
+  const openai = plugin.extensions['com.openai']
+
+  it('describes the same server', () => {
+    expect(plugin.name).toBe(SERVER_INFO.name)
+    expect(plugin.version).toBe(SERVER_INFO.version)
+    expect(plugin.description).toBe(SHORT_DESCRIPTION)
+    expect(plugin.homepage).toBe(SERVER_INFO.websiteUrl)
+    expect(plugin.license).toBe('MIT')
+    expect(openai.interface.displayName).toBe(SERVER_INFO.title)
+    expect(mcp.mcpServers).toEqual({ [SERVER_INFO.name]: { type: 'streamable-http', url: card.remotes[0].url } })
+  })
+
+  it('stays within the listing limits', () => {
+    const ui = openai.interface
+    expect(ui.displayName.length).toBeLessThanOrEqual(30)
+    expect(ui.shortDescription.length).toBeLessThanOrEqual(30)
+    expect(ui.longDescription.length).toBeLessThanOrEqual(4000)
+    expect(ui.defaultPrompt.length).toBeLessThanOrEqual(3)
+    for (const prompt of ui.defaultPrompt) expect(prompt.length).toBeLessThanOrEqual(128)
+    for (const key of ['websiteURL', 'supportURL', 'privacyPolicyURL', 'termsOfServiceURL']) expect(ui[key]).toMatch(/^https:\/\//)
+  })
+
+  it('has the review test cases and only real tools', () => {
+    const { positive, negative } = openai.review.test_cases
+    expect(positive).toHaveLength(5)
+    expect(negative).toHaveLength(3)
+    const tools = new Set(['judge_idea', 'get_stats'])
+    for (const t of positive) {
+      expect(t.expected_behavior).toBeTruthy()
+      for (const name of t.tools_triggered.split(',')) expect(tools.has(name.trim())).toBe(true)
+    }
+  })
+
+  it('ships its logo', () => {
+    expect(readFileSync(resolve(import.meta.dirname, '../chatgpt-plugin', openai.interface.logo), 'utf8')).toMatch(/^<svg[^>]*viewBox="0 0 64 64"/)
+  })
+})
