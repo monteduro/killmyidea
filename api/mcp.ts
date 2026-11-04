@@ -18,11 +18,11 @@ import { PROTOCOL_VERSIONS, SERVER_INFO } from './_mcp-meta.js'
 export { PROTOCOL_VERSIONS }
 
 const INSTRUCTIONS = `Kill My Idea judges startup and side-project ideas with Jev (TypeSafe AI), a classifier, not a chatbot.
-Call judge_idea with a concrete description: who it is for, what it does, how it makes money or spreads.
+judge_idea works best with a concrete description: who it is for, what it does, how it makes money or spreads.
 It returns KILL IT (<${VERDICT_THRESHOLDS.fix}), FIX IT (${VERDICT_THRESHOLDS.fix}-${VERDICT_THRESHOLDS.ship - 1}) or SHIP IT (${VERDICT_THRESHOLDS.ship}+), a 0-100 score and eight 0-100 sub-scores.
-The text result is a ready-made card with bar charts in a code block: show it to the user exactly as returned, then add at most one sentence on what to test next.
-If needs_detail is true, ask the user for more detail instead of inventing a verdict.
-Ideas are archived anonymously for product analytics unless do_not_archive is true: set it for confidential ideas.`
+The text result is a preformatted card with bar charts in a code block; structuredContent holds the same data as fields.
+When an idea is too vague to judge, needs_detail is true and no verdict or score is given.
+Ideas are archived anonymously for product analytics unless do_not_archive is true.`
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -35,7 +35,7 @@ const TOOLS = [
   {
     name: 'judge_idea',
     title: 'Judge a startup idea',
-    description: `Judge a startup or side-project idea. Returns a verdict (verdict KILL, FIX or SHIP, shown as verdict_label KILL IT, FIX IT or SHIP IT), an overall score, the best_signal, the biggest_risk and the eight scored dimensions. If the idea is too vague to judge, needs_detail is true and verdict, verdict_label, score, best_signal and biggest_risk are null: ask the user for more detail. ${DECISION_COUNT} Jev decisions in about a second. Deterministic rubric, no generated prose. The text result is a terminal-ready card with bar charts: show it as returned.`,
+    description: `Judge a startup or side-project idea. Returns a verdict (verdict KILL, FIX or SHIP, shown as verdict_label KILL IT, FIX IT or SHIP IT), an overall score, the best_signal, the biggest_risk and the eight scored dimensions. If the idea is too vague to judge, needs_detail is true and verdict, verdict_label, score, best_signal and biggest_risk are null, and message says which details are missing. ${DECISION_COUNT} Jev decisions in about a second. Deterministic rubric, no generated prose. The text result is a preformatted card with bar charts.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -55,7 +55,7 @@ const TOOLS = [
         do_not_archive: {
           type: 'boolean',
           default: false,
-          description: 'Set true for confidential ideas: the idea text is then not stored. Otherwise it is archived anonymously (no IP, no identity).',
+          description: 'When true, the idea text is not stored, for confidential ideas. Otherwise it is archived anonymously (no IP, no identity).',
         },
       },
       required: ['idea'],
@@ -78,7 +78,7 @@ const TOOLS = [
         },
         needs_detail: {
           type: 'boolean',
-          description: 'True when Jev could not understand the idea well enough to judge it: no verdict, score or signals are given. Ask the user for more detail.',
+          description: 'True when Jev could not understand the idea well enough to judge it: no verdict, score or signals are given, and message says which details are missing.',
         },
         message: { type: 'string', description: 'One-line summary such as "SHIP IT. 72/100.", or the request for more detail when needs_detail is true.' },
         goal: { type: 'string', enum: [...GOALS], description: 'The goal the idea was judged against.' },
@@ -250,7 +250,7 @@ export function bar(score: number, width = BAR_WIDTH): string {
 
 /**
  * The text content is a ready-made terminal card: verdict, score bar and one bar per question,
- * in a code block so it stays aligned. Agents are told to show it as returned.
+ * in a code block so it stays aligned.
  */
 export function toText(result: ReturnType<typeof toToolResult>): string {
   const footer = `Judged by Jev (TypeSafe AI) in ${result.latency_ms}ms · ${result.try_it}`

@@ -149,7 +149,7 @@ Returns `structuredContent`:
 
 `dimensions` always has eight entries. A Markdown summary is also returned as text content.
 
-If `needs_detail` is `true`, the idea was too vague: `verdict`, `score`, `best_signal` and `biggest_risk` are `null`. Ask the user who it is for, what it does and how it makes money or spreads, then call again. Do not invent a verdict.
+If `needs_detail` is `true`, the idea was too vague: `verdict`, `score`, `best_signal` and `biggest_risk` are `null`, and `message` says what is missing: who it is for, what it does and how it makes money or spreads. A call with those details gets a verdict.
 
 Errors (idea too short or too long, unknown goal, Jev busy) come back as a tool result with `isError: true` and a one-line message.
 
@@ -173,7 +173,7 @@ Clear customer  ███████░░░░░░░░░░░░░   3
 - Money 13       Getting users may be easier than getting customers.
 ```
 
-- Show the card exactly as returned, then add at most one sentence on what to test next.
+- The card is preformatted, so it reads the same in a chat and in a terminal.
 - If you build your own UI, use `structuredContent` instead.
 - Credit "Judged by Jev (TypeSafe AI)" and link __SITE_URL__ when you show a verdict to a person.
 

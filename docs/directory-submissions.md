@@ -181,10 +181,11 @@ fields are not public). Prepare:
 
 ## Review risks found in the current server
 
+Tool descriptions and server instructions are descriptive only (no instructions to the model);
+`api/mcp.test.ts` keeps them that way.
+
 These may be flagged by the reviews above. Not changed yet:
 
-- The server instructions tell the model to show the card "exactly as returned". Claude's review
-  rejects descriptions that tell Claude how to behave.
 - `latency_ms`, `judged_by` and `try_it` in the result look like the telemetry and promotional data
   that ChatGPT's review calls extraneous.
 - Archiving is on by default. Making it opt-in would ease Muse and simplify every data disclosure.

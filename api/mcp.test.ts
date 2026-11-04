@@ -94,6 +94,24 @@ describe('MCP lifecycle', () => {
     expect(await res.text()).toBe('')
   })
 
+  // Directory review (Claude, ChatGPT) rejects descriptions that tell the model how to behave.
+  it('describes tools and the server without telling the model what to do', async () => {
+    const init = await (await rpc({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18' } })).json()
+    const { result } = await (await rpc({ jsonrpc: '2.0', id: 3, method: 'tools/list' })).json()
+    const texts: string[] = [init.result.instructions, init.result.serverInfo.description]
+    const collect = (node: unknown) => {
+      if (!node || typeof node !== 'object') return
+      for (const [key, value] of Object.entries(node)) {
+        if (key === 'description' && typeof value === 'string') texts.push(value)
+        else collect(value)
+      }
+    }
+    collect(result.tools)
+    for (const text of texts) {
+      expect(text).not.toMatch(/\b(ask the user|show (it|the card)|as returned|you must|do not invent|instead of inventing)\b/i)
+    }
+  })
+
   it('lists judge_idea and get_stats', async () => {
     const { result } = await (await rpc({ jsonrpc: '2.0', id: 3, method: 'tools/list' })).json()
     expect(result.tools.map((t: { name: string }) => t.name)).toEqual(['judge_idea', 'get_stats'])
