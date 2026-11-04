@@ -33,6 +33,42 @@ const call = async (name: string, args: Record<string, unknown> = {}) => {
   return (await res.json()).result
 }
 
+type Schema = {
+  type?: string | string[]
+  enum?: unknown[]
+  minimum?: number
+  maximum?: number
+  minItems?: number
+  maxItems?: number
+  required?: string[]
+  properties?: Record<string, Schema>
+  items?: Schema
+}
+
+/** Just enough JSON Schema to check our own outputSchema: returns the paths that do not conform. */
+function conforms(value: unknown, schema: Schema, path = '$'): string[] {
+  const kind = value === null ? 'null' : Array.isArray(value) ? 'array' : Number.isInteger(value) ? 'integer' : typeof value
+  const types = schema.type === undefined ? [] : [schema.type].flat()
+  if (types.length && !types.includes(kind) && !(kind === 'integer' && types.includes('number'))) return [`${path}: ${kind}`]
+  if (schema.enum && !schema.enum.includes(value)) return [`${path}: ${String(value)} not in enum`]
+  if (typeof value === 'number') {
+    if (schema.minimum !== undefined && value < schema.minimum) return [`${path}: below minimum`]
+    if (schema.maximum !== undefined && value > schema.maximum) return [`${path}: above maximum`]
+  }
+  if (Array.isArray(value)) {
+    if (schema.minItems !== undefined && value.length < schema.minItems) return [`${path}: too few items`]
+    if (schema.maxItems !== undefined && value.length > schema.maxItems) return [`${path}: too many items`]
+    return schema.items ? value.flatMap((v, i) => conforms(v, schema.items!, `${path}[${i}]`)) : []
+  }
+  if (kind === 'object') {
+    const obj = value as Record<string, unknown>
+    const missing = (schema.required ?? []).filter((k) => !(k in obj)).map((k) => `${path}.${k}: missing`)
+    const nested = Object.entries(schema.properties ?? {}).flatMap(([k, s]) => (k in obj ? conforms(obj[k], s, `${path}.${k}`) : []))
+    return [...missing, ...nested]
+  }
+  return []
+}
+
 describe('MCP lifecycle', () => {
   it('negotiates the protocol version and advertises tools', async () => {
     const res = await rpc({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {} } })
@@ -115,6 +151,18 @@ describe('judge_idea', () => {
     })
     expect(result.structuredContent.dimensions.map((d: { key: string }) => d.key)).toContain('adoption')
     expect(saveEvaluation).not.toHaveBeenCalled()
+  })
+
+  it('matches its declared outputSchema, with and without needs_detail', async () => {
+    const { result: list } = await (await rpc({ jsonrpc: '2.0', id: 9, method: 'tools/list' })).json()
+    const schema = list.tools.find((t: { name: string }) => t.name === 'judge_idea').outputSchema
+    // The mock marks ideas under 40 characters as not understandable.
+    const judged = await call('judge_idea', { idea: 'A Slack bot that turns standups into a weekly changelog for clients.' })
+    const vague = await call('judge_idea', { idea: 'An app for everyone, basically.' })
+    expect(judged.structuredContent.needs_detail).toBe(false)
+    expect(vague.structuredContent.needs_detail).toBe(true)
+    expect(conforms(judged.structuredContent, schema)).toEqual([])
+    expect(conforms(vague.structuredContent, schema)).toEqual([])
   })
 
   it('returns validation problems as tool errors', async () => {

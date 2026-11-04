@@ -43,7 +43,7 @@ const TOOLS = [
   {
     name: 'judge_idea',
     title: 'Judge a startup idea',
-    description: `Judge a startup or side-project idea. Returns a verdict (KILL IT, FIX IT or SHIP IT), a 0-100 score, the best signal, the biggest risk and eight 0-100 sub-scores. ${DECISION_COUNT} Jev decisions in about a second. Deterministic rubric, no generated prose. The text result is a terminal-ready card with bar charts: show it as returned.`,
+    description: `Judge a startup or side-project idea. Returns a verdict (verdict KILL, FIX or SHIP, shown as verdict_label KILL IT, FIX IT or SHIP IT), an overall score, the best_signal, the biggest_risk and the eight scored dimensions. If the idea is too vague to judge, needs_detail is true and verdict, verdict_label, score, best_signal and biggest_risk are null: ask the user for more detail. ${DECISION_COUNT} Jev decisions in about a second. Deterministic rubric, no generated prose. The text result is a terminal-ready card with bar charts: show it as returned.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -58,7 +58,7 @@ const TOOLS = [
           enum: [...GOALS],
           default: 'money',
           description:
-            'Why the idea is being built, which decides the questions it is scored on. money (Make money) judges it as a business; open_source (Open source) scores Adoption instead of Money; fun (Just for fun) scores Immediate appeal and Fun instead of Real problem and Money.',
+            'Why the idea is being built, which decides the questions it is scored on. Making money judges it as a business. Open source scores Adoption instead of Money. Just for fun scores Immediate appeal and Fun instead of Real problem and Money.',
         },
         do_not_archive: {
           type: 'boolean',
@@ -97,9 +97,10 @@ const TOOLS = [
           properties: {
             dimension: { type: 'string', description: 'Dimension key.' },
             label: { type: 'string', description: 'Dimension name for display.' },
-            score: { type: 'integer', description: 'Dimension score, 0-100.' },
+            score: { type: 'integer', minimum: 0, maximum: 100, description: 'Dimension score.' },
             note: { type: 'string', description: 'Fixed one-line comment on this strength.' },
           },
+          required: ['dimension', 'label', 'score', 'note'],
         },
         biggest_risk: {
           type: ['object', 'null'],
@@ -107,22 +108,26 @@ const TOOLS = [
           properties: {
             dimension: { type: 'string', description: 'Dimension key.' },
             label: { type: 'string', description: 'Dimension name for display.' },
-            score: { type: 'integer', description: 'Dimension score, 0-100.' },
+            score: { type: 'integer', minimum: 0, maximum: 100, description: 'Dimension score.' },
             note: { type: 'string', description: 'Fixed one-line comment on this risk.' },
           },
+          required: ['dimension', 'label', 'score', 'note'],
         },
         dimensions: {
           type: 'array',
-          description: 'The eight scored questions for this goal, in display order.',
+          description: 'The scored questions for this goal, in display order.',
+          minItems: 8,
+          maxItems: 8,
           items: {
             type: 'object',
             properties: {
               key: { type: 'string', description: 'Dimension key.' },
               label: { type: 'string', description: 'Dimension name for display.' },
               question: { type: 'string', description: 'What this dimension asks about the idea.' },
-              score: { type: 'integer', description: 'Score for this dimension, 0-100.' },
+              score: { type: 'integer', minimum: 0, maximum: 100, description: 'Score for this dimension.' },
               weight: { type: 'integer', description: 'Weight of this dimension in the overall score.' },
             },
+            required: ['key', 'label', 'question', 'score', 'weight'],
           },
         },
         thresholds: {
@@ -133,13 +138,30 @@ const TOOLS = [
             fix: { type: 'string', description: 'Score range for FIX, e.g. "50-64".' },
             ship: { type: 'string', description: 'Score range for SHIP, e.g. "65+".' },
           },
+          required: ['kill', 'fix', 'ship'],
         },
         scoring_version: { type: 'integer', description: 'Version of the questions, weights and thresholds used.' },
         latency_ms: { type: 'integer', description: 'Time Jev took to answer, in milliseconds.' },
         judged_by: { type: 'string', description: 'The model that judged the idea.' },
         try_it: { type: 'string', description: 'Link to the Kill My Idea website.' },
       },
-      required: ['verdict', 'score', 'needs_detail', 'goal', 'dimensions'],
+      required: [
+        'verdict',
+        'verdict_label',
+        'score',
+        'needs_detail',
+        'message',
+        'goal',
+        'category',
+        'best_signal',
+        'biggest_risk',
+        'dimensions',
+        'thresholds',
+        'scoring_version',
+        'latency_ms',
+        'judged_by',
+        'try_it',
+      ],
     },
     annotations: { title: 'Judge a startup idea', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   },
