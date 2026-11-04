@@ -42,6 +42,11 @@ describe('MCP lifecycle', () => {
     expect(result.protocolVersion).toBe('2025-06-18')
     expect(result.capabilities).toHaveProperty('tools')
     expect(result.serverInfo.name).toBe('killmyidea')
+    expect(result.serverInfo.title).toBe('Kill My Idea')
+    expect(result.serverInfo.websiteUrl).toBe('https://killmyidea.biz/mcp/')
+    expect(result.serverInfo.description).toMatch(/judge a startup or side-project idea/)
+    expect(result.serverInfo.icons).toEqual([{ src: 'https://killmyidea.biz/favicon.svg', mimeType: 'image/svg+xml', sizes: ['any'] }])
+    expect(result.instructions).toMatch(/judge_idea/)
 
     const unknown = await (await rpc({ jsonrpc: '2.0', id: 2, method: 'initialize', params: { protocolVersion: '1999-01-01' } })).json()
     expect(unknown.result.protocolVersion).toBe(PROTOCOL_VERSIONS[0])
@@ -56,6 +61,14 @@ describe('MCP lifecycle', () => {
   it('lists judge_idea and get_stats', async () => {
     const { result } = await (await rpc({ jsonrpc: '2.0', id: 3, method: 'tools/list' })).json()
     expect(result.tools.map((t: { name: string }) => t.name)).toEqual(['judge_idea', 'get_stats'])
+    for (const tool of result.tools) {
+      for (const hint of ['readOnlyHint', 'destructiveHint', 'idempotentHint', 'openWorldHint']) {
+        expect(typeof tool.annotations[hint], `${tool.name}.${hint}`).toBe('boolean')
+      }
+      for (const [key, field] of Object.entries(tool.outputSchema.properties)) {
+        expect((field as { description?: string }).description, `${tool.name} output ${key}`).toBeTruthy()
+      }
+    }
   })
 
   it('reports JSON-RPC errors', async () => {

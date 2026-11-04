@@ -15,7 +15,15 @@ import { judge } from './_judge.js'
 /** Newest first. An unknown requested version gets the newest one. */
 export const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']
 
-const SERVER_INFO = { name: 'killmyidea', title: 'Kill My Idea', version: '1.0.0', websiteUrl: `${SITE_URL}/mcp/` }
+const SERVER_INFO = {
+  name: 'killmyidea',
+  title: 'Kill My Idea',
+  version: '1.0.0',
+  description:
+    'Helps an agent judge a startup or side-project idea before anyone builds it: send a plain-words description and get a KILL IT, FIX IT or SHIP IT verdict, a 0-100 score, the best signal, the biggest risk and eight 0-100 sub-scores from Jev (TypeSafe AI). Also reports how many ideas have been judged and how they ended.',
+  icons: [{ src: `${SITE_URL}/favicon.svg`, mimeType: 'image/svg+xml', sizes: ['any'] }],
+  websiteUrl: `${SITE_URL}/mcp/`,
+}
 
 const INSTRUCTIONS = `Kill My Idea judges startup and side-project ideas with Jev (TypeSafe AI), a classifier, not a chatbot.
 Call judge_idea with a concrete description: who it is for, what it does, how it makes money or spreads.
@@ -49,7 +57,8 @@ const TOOLS = [
           type: 'string',
           enum: [...GOALS],
           default: 'money',
-          description: `What the idea is for. ${GOALS.map((g) => `"${g}" = ${GOAL_LABELS[g]}`).join(', ')}. open_source swaps Money for Adoption; fun swaps Real problem and Money for Immediate appeal and Fun.`,
+          description:
+            'Why the idea is being built, which decides the questions it is scored on. money (Make money) judges it as a business; open_source (Open source) scores Adoption instead of Money; fun (Just for fun) scores Immediate appeal and Fun instead of Real problem and Money.',
         },
         do_not_archive: {
           type: 'boolean',
@@ -63,21 +72,72 @@ const TOOLS = [
     outputSchema: {
       type: 'object',
       properties: {
-        verdict: { type: ['string', 'null'], enum: ['KILL', 'FIX', 'SHIP', null] },
-        verdict_label: { type: ['string', 'null'] },
-        score: { type: ['integer', 'null'], minimum: 0, maximum: 100 },
-        needs_detail: { type: 'boolean' },
-        message: { type: 'string' },
-        goal: { type: 'string', enum: [...GOALS] },
-        category: { type: 'string' },
-        best_signal: { type: ['object', 'null'] },
-        biggest_risk: { type: ['object', 'null'] },
-        dimensions: { type: 'array', items: { type: 'object' } },
-        thresholds: { type: 'object' },
-        scoring_version: { type: 'integer' },
-        latency_ms: { type: 'integer' },
-        judged_by: { type: 'string' },
-        try_it: { type: 'string' },
+        verdict: {
+          type: ['string', 'null'],
+          enum: ['KILL', 'FIX', 'SHIP', null],
+          description: 'Verdict code from the score and the thresholds below. null when needs_detail is true.',
+        },
+        verdict_label: { type: ['string', 'null'], description: 'Display form of the verdict, e.g. "KILL IT". null when needs_detail is true.' },
+        score: {
+          type: ['integer', 'null'],
+          minimum: 0,
+          maximum: 100,
+          description: 'Overall score: weighted average of the dimension scores, rounded. null when needs_detail is true.',
+        },
+        needs_detail: {
+          type: 'boolean',
+          description: 'True when Jev could not understand the idea well enough to judge it: no verdict, score or signals are given. Ask the user for more detail.',
+        },
+        message: { type: 'string', description: 'One-line summary such as "SHIP IT. 72/100.", or the request for more detail when needs_detail is true.' },
+        goal: { type: 'string', enum: [...GOALS], description: 'The goal the idea was judged against.' },
+        category: { type: 'string', description: 'Product category Jev assigned to the idea.' },
+        best_signal: {
+          type: ['object', 'null'],
+          description: 'The highest-scoring dimension. null when needs_detail is true.',
+          properties: {
+            dimension: { type: 'string', description: 'Dimension key.' },
+            label: { type: 'string', description: 'Dimension name for display.' },
+            score: { type: 'integer', description: 'Dimension score, 0-100.' },
+            note: { type: 'string', description: 'Fixed one-line comment on this strength.' },
+          },
+        },
+        biggest_risk: {
+          type: ['object', 'null'],
+          description: 'The lowest-scoring dimension. null when needs_detail is true.',
+          properties: {
+            dimension: { type: 'string', description: 'Dimension key.' },
+            label: { type: 'string', description: 'Dimension name for display.' },
+            score: { type: 'integer', description: 'Dimension score, 0-100.' },
+            note: { type: 'string', description: 'Fixed one-line comment on this risk.' },
+          },
+        },
+        dimensions: {
+          type: 'array',
+          description: 'The eight scored questions for this goal, in display order.',
+          items: {
+            type: 'object',
+            properties: {
+              key: { type: 'string', description: 'Dimension key.' },
+              label: { type: 'string', description: 'Dimension name for display.' },
+              question: { type: 'string', description: 'What this dimension asks about the idea.' },
+              score: { type: 'integer', description: 'Score for this dimension, 0-100.' },
+              weight: { type: 'integer', description: 'Weight of this dimension in the overall score.' },
+            },
+          },
+        },
+        thresholds: {
+          type: 'object',
+          description: 'Score ranges for each verdict.',
+          properties: {
+            kill: { type: 'string', description: 'Score range for KILL, e.g. "<50".' },
+            fix: { type: 'string', description: 'Score range for FIX, e.g. "50-64".' },
+            ship: { type: 'string', description: 'Score range for SHIP, e.g. "65+".' },
+          },
+        },
+        scoring_version: { type: 'integer', description: 'Version of the questions, weights and thresholds used.' },
+        latency_ms: { type: 'integer', description: 'Time Jev took to answer, in milliseconds.' },
+        judged_by: { type: 'string', description: 'The model that judged the idea.' },
+        try_it: { type: 'string', description: 'Link to the Kill My Idea website.' },
       },
       required: ['verdict', 'score', 'needs_detail', 'goal', 'dimensions'],
     },
@@ -91,15 +151,23 @@ const TOOLS = [
     outputSchema: {
       type: 'object',
       properties: {
-        analyzed: { type: 'integer' },
+        analyzed: {
+          type: 'integer',
+          description: 'Ideas judged and archived so far. Ideas judged with do_not_archive (or the website privacy opt-out) are not counted.',
+        },
         verdicts: {
           type: 'object',
-          properties: { KILL: { type: 'integer' }, FIX: { type: 'integer' }, SHIP: { type: 'integer' } },
+          description: 'How many of the archived ideas got each verdict.',
+          properties: {
+            KILL: { type: 'integer', description: 'Ideas that got KILL IT.' },
+            FIX: { type: 'integer', description: 'Ideas that got FIX IT.' },
+            SHIP: { type: 'integer', description: 'Ideas that got SHIP IT.' },
+          },
         },
       },
       required: ['analyzed', 'verdicts'],
     },
-    annotations: { title: 'Kill My Idea stats', readOnlyHint: true, openWorldHint: false },
+    annotations: { title: 'Kill My Idea stats', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
 ]
 
