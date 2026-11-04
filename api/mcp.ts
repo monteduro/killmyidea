@@ -1,6 +1,8 @@
 // POST /api/mcp — free, public MCP server (Streamable HTTP, stateless, no auth).
 // Every request is one JSON-RPC message answered with plain JSON: no sessions, no SSE.
 // Docs for humans and agents: /mcp/ and /mcp.md.
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { SITE_URL } from '../src/lib/features.js'
 import { DECISION_COUNT, DIMENSION_HINTS, DIMENSION_LABELS, GOALS, GOAL_LABELS, type DimensionKey } from '../src/lib/questions.js'
 import { dimensionCopy, LOW_CLARITY_COPY } from '../src/lib/copy.js'
@@ -12,7 +14,6 @@ import { VERDICT_THRESHOLDS, verdictLabel } from '../src/lib/verdict.js'
 import { evaluationStats, logMcpRequest } from './_analytics-db.js'
 import { judge } from './_judge.js'
 import { PROTOCOL_VERSIONS, SERVER_INFO } from './_mcp-meta.js'
-import { setupHtml, setupText } from './_mcp-setup.js'
 
 export { PROTOCOL_VERSIONS }
 
@@ -413,11 +414,27 @@ export async function POST(request: Request): Promise<Response> {
   return response === null ? new Response(null, { status: 202, headers: CORS }) : json(response)
 }
 
+/**
+ * The built docs, so the endpoint shows the same /mcp/ page and /mcp.md as the site.
+ * Resolves to <root>/dist from api/ (dev, tests) and from dist-server/ (production bundle).
+ */
+const docs = new Map<string, string | null>()
+function builtDoc(file: string): string | null {
+  if (!docs.has(file)) {
+    try {
+      docs.set(file, readFileSync(resolve(import.meta.dirname, '../dist', file), 'utf8'))
+    } catch {
+      docs.set(file, null)
+    }
+  }
+  return docs.get(file)!
+}
+
 const cached = { 'Cache-Control': 'public, max-age=3600', Vary: 'Accept', ...CORS }
 
 /**
  * A GET asking for an SSE stream gets 405, as the Streamable HTTP spec requires of a server
- * without one. Browsers get an HTML landing page with setup; anything else gets it as plain text.
+ * without one. Browsers get the /mcp/ setup page; anything else gets /mcp.md.
  */
 export function GET(request?: Request): Response {
   const accept = request?.headers.get('accept') ?? ''
@@ -425,9 +442,15 @@ export function GET(request?: Request): Response {
     return new Response(null, { status: 405, headers: { Allow: 'POST, OPTIONS', ...CORS } })
   }
   if (accept.includes('text/html')) {
-    return new Response(setupHtml(), { headers: { 'Content-Type': 'text/html; charset=utf-8', ...cached } })
+    const page = builtDoc('mcp/index.html')
+    if (page) return new Response(page, { headers: { 'Content-Type': 'text/html; charset=utf-8', ...cached } })
+    return new Response(null, { status: 302, headers: { Location: `${SITE_URL}/mcp/`, ...cached } })
   }
-  return new Response(setupText(), { headers: { 'Content-Type': 'text/plain; charset=utf-8', ...cached } })
+  const markdown = builtDoc('mcp.md')
+  if (markdown) return new Response(markdown, { headers: { 'Content-Type': 'text/markdown; charset=utf-8', ...cached } })
+  return new Response(`Kill My Idea MCP server. POST JSON-RPC here. Setup: ${SITE_URL}/mcp/ (humans), ${SITE_URL}/mcp.md (agents)\n`, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', ...cached },
+  })
 }
 
 export function OPTIONS(): Response {

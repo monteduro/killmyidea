@@ -124,22 +124,21 @@ describe('MCP lifecycle', () => {
   it('refuses a GET stream but shows setup instructions to any other GET', async () => {
     const stream = GET(new Request('http://localhost/api/mcp', { headers: { Accept: 'text/event-stream' } }))
     expect(stream.status).toBe(405)
-    // What a browser sends.
+    // What a browser sends. Without a build there is no page to serve, so it redirects to /mcp/.
     const page = GET(new Request('http://localhost/api/mcp', { headers: { Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' } }))
-    expect(page.status).toBe(200)
-    expect(page.headers.get('Content-Type')).toBe('text/html; charset=utf-8')
     expect(page.headers.get('Vary')).toBe('Accept')
-    const html = await page.text()
-    expect(html).toMatch(/^<!doctype html>/)
-    expect(html).toContain('<title>Kill My Idea MCP server</title>')
-    expect(html).toContain('claude mcp add --transport http killmyidea https://killmyidea.biz/api/mcp')
-    expect(html).toContain('{ &quot;mcpServers&quot;')
+    if (page.status === 200) {
+      expect(page.headers.get('Content-Type')).toBe('text/html; charset=utf-8')
+      expect(await page.text()).toContain('claude mcp add --transport http killmyidea')
+    } else {
+      expect(page.status).toBe(302)
+      expect(page.headers.get('Location')).toBe('https://killmyidea.biz/mcp/')
+    }
 
     const plain = GET(new Request('http://localhost/api/mcp', { headers: { Accept: '*/*' } }))
-    expect(plain.headers.get('Content-Type')).toBe('text/plain; charset=utf-8')
-    const text = await plain.text()
-    expect(text).toContain('claude mcp add --transport http killmyidea https://killmyidea.biz/api/mcp')
-    expect(text).toContain('https://killmyidea.biz/api/mcp/server-card')
+    expect(plain.status).toBe(200)
+    expect(plain.headers.get('Content-Type')).toMatch(/^text\/(markdown|plain)/)
+    expect(await plain.text()).toContain('https://killmyidea.biz/mcp')
     expect(GET().status).toBe(200)
     expect(OPTIONS().status).toBe(204)
   })
